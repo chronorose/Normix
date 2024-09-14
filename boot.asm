@@ -1,27 +1,22 @@
 [BITS 16]
 
 cli
-mov ax, 0x7C0
-mov sp, ax 
-mov es, ax
-mov ds, ax
-xor ax, ax
-mov ss, ax
-mov bp, msg
-sti
+mov sp, 0x7C0
+mov ds, sp
+mov ss, sp 
 
-mov ah, 0x13
-mov bl, 0x1
-mov al, 1
-mov cx, msg_length
-mov dh, 16 
-mov dl, 0 
-int 0x10
+mov ah, 0xe
+mov si, msg
 
 loop:
-    jmp loop
+    lodsb
+    int 0x10
+    test al, al
+    jnz loop
 
-msg db 'Hello, World!'
+hlt
+
+msg db 'Hello, World!', 0
 msg_length equ $-msg
 
 times  510 - ($-$$) db 0
