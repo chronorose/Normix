@@ -1,13 +1,22 @@
 [BITS 16]
 
-mov ah, 0xE
-mov al, 65
-int 0x10
+cli
+mov sp, 0x7C0
+mov ss, sp 
+
+mov ah, 0xe
+mov si, msg
 
 loop:
-    mov ax, 420 
-    jmp loop
-    
+    ss lodsb
+    int 0x10
+    test al, al
+    jnz loop
 
-times 510 - ($ - $$) db 0
-dw 0xAA55
+hlt
+
+msg db 'Hello, World!', 0
+
+times  510 - ($-$$) db 0
+dw 0xaa55
+
