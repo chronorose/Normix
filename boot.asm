@@ -27,71 +27,85 @@ mov bx, 1
 ; new code starts at (linear) 0x20000
 mov ax, [CODE_LOCATION]
 mov ds, ax
-; mov di, 1
-
-xor bp, bp ; loop counter
-; xor si, si
 xor di, di
+
+xor si, si ; loop counter
+
+xor sp, sp
 
 ; cylinders loop
 c_loop:
-    ; head loop
-    h_loop:
-        mov ah, 0x2
-        mov al, 18  ; sectors
+    mov bx, 1
 
-        mov cx, bp  ; something like 'mov ch, bp'
-        shl cx, 8
-        mov cl, 1
+    ; write (c, 0, 1)
+    mov ah, 0x2
+    mov al, 18  ; sectors
 
-        push dx
+    mov cx, si  ; something like 'mov ch, si'
+    shl cx, 8
+    mov cl, 1
 
-        shl dx, 8
-        ; mov dh, 0
-        int 0x13
+    xor dh, dh
+    int 0x13
 
-        pop dx
+    ; advance buffer offset on 9 KB
+    add bx, 0x2400
+    ;add bx, 0x4800
 
-        ; xchg es, ds
-        mov ax, es
-        mov cx, ds
-        mov ds, ax
-        mov es, cx
+    ; write (c, 1, 1) TODO: remove copypaste
+    mov ah, 0x2
+    mov al, 18  ; sectors
 
-        ; mov di, 1
-        mov si, 1
-        
-        ; 0x1200 = 4608
-        mov cx, 0x1200
-        ; to copy 9 KB from buffer to dst 
-        ; we need to movsw 9 * 1024 / 2 times
-        cpy_frm_bffr:
-            movsw
-            loop cpy_frm_bffr
+    mov cx, si  ; something like 'mov ch, si'
+    shl cx, 8
+    mov cl, 1
 
-        ; xchg es, ds
-        mov ax, es
-        mov cx, ds
-        mov ds, ax
-        mov es, cx
+    inc dh
+    int 0x13
 
-        inc dx
-        cmp dx, 2
-        jl h_loop
+    ; restore buffer offset
+    mov bx, 1
+    ; mov cx, 0x2400
+    mov cx, 0x1200
+    cpy_frm_bfr:
+        mov word ax, [es:bx]
+        mov word [ds:di], ax
 
-    inc bp
-    cmp bp, 21  ; 21 - number of cylinders to cover 384 Kbytes
-    ;jne c_loop
+        add bx, 2
+        add di, 2
+
+        jnz skip
+
+        advance_ds:
+            mov ax, ds
+            add ax, 0x1000
+            mov ds, ax
+            inc sp ; for debugging purposes
+
+        skip:
+            loop cpy_frm_bfr
+
+    inc si
+    cmp si, 22  ; 21 - number of cylinders to cover 384 Kbytes
+    ;cmp si, 21  ; 21 - number of cylinders to cover 384 Kbytes
+    jne c_loop
+
+mov ax, [CODE_LOCATION]
+mov ds, ax
 
 xor bp, bp
-mov cx, 512
-mov bx, 1024 ; offset
+mov cx, 1024
+mov bx, 512 ; offset
 
+xor ax, ax
 l3:
     mov ah, 0xE
     mov al, byte [ds:bx]
-    ;add bp, ax
+    add bp, ax
     int 0x10
+
+    mov ah, byte [ds:bx]
+    add bp, ax
 
     inc bx
     loop l3
