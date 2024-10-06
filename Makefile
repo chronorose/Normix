@@ -1,5 +1,5 @@
 run: all
-	qemu-system-x86_64 -monitor stdio -blockdev driver=file,node-name=f0,filename=./build/boot.img -device floppy,drive=f0
+	qemu-system-x86_64 -s -monitor stdio -blockdev driver=file,node-name=f0,filename=./build/boot.img -device floppy,drive=f0
 
 all: boot
 	dd if=/dev/zero of=./build/boot.img bs=1024 count=1440
@@ -8,6 +8,8 @@ all: boot
 
 boot:
 	nasm -fbin boot.asm -o ./build/boot.bin
+	# nasm -f elf16 boot.asm -o ./build/boot.o
+	# ld ./build/boot.o -o ./build/boot
 kloader:
 	nasm -fbin kloader.asm -o ./build/kloader.bin
 clean:

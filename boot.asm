@@ -7,6 +7,9 @@ cli
 mov ss, ax
 xor sp, sp
 sti
+cld
+
+; Printing 'Hello world!'
 
 mov cl, 0xD
 mov bx, msg
@@ -19,93 +22,80 @@ l1:
     inc bx
     loop l1
 
-; buffer location starts at (linear) 0x801
-mov ax, [BUFF_LOCATION]
+; Loading kernel
+
+xor cx, cx
+
+mov ax, [CODE_ADDR]
 mov es, ax
-mov bx, 1
 
-; new code starts at (linear) 0x20000
-mov ax, [CODE_LOCATION]
+mov ax, [BUFF_ADDR]
 mov ds, ax
-xor di, di
 
-xor si, si ; loop counter
-
-xor sp, sp
-
-; cylinders loop
-c_loop:
+cloop:
+    xor dx, dx
     mov bx, 1
+    push cx
+    hloop:
+        push dx
 
-    ; write (c, 0, 1)
-    mov ah, 0x2
-    mov al, 18  ; sectors
+        mov ah, 0x2
+        mov al, 18
+        mov ch, cl ; moving cylinder iterator in ch
+        mov cl, 1
 
-    mov cx, si  ; something like 'mov ch, si'
-    shl cx, 8
-    mov cl, 1
+        mov dh, dl
 
-    xor dh, dh
-    int 0x13
+        call disk_to_buffer
 
-    ; advance buffer offset on 9 KB
-    add bx, 0x2400
-    ;add bx, 0x4800
+        pop dx
+        
+        add bx, 0x2400
+        inc dx
+        cmp dx, 2
+        jl hloop
 
-    ; write (c, 1, 1) TODO: remove copypaste
-    mov ah, 0x2
-    mov al, 18  ; sectors
+    mov cx, 0x2400
+    mov si, 1
+    call buffer_to_cs
 
-    mov cx, si  ; something like 'mov ch, si'
-    shl cx, 8
-    mov cl, 1
+    pop cx
 
-    inc dh
-    int 0x13
+    inc cx
+    cmp cx, 21
+    jl cloop
 
-    ; restore buffer offset
-    mov bx, 1
-    ; mov cx, 0x2400
-    mov cx, 0x1200
-    cpy_frm_bfr:
-        mov word ax, [es:bx]
-        mov word [ds:di], ax
+; -------------------
 
-        add bx, 2
-        add di, 2
+; Loading remaining 6 KB
 
-        jnz skip
+mov ah, 0x2
+mov al, 12
+mov ch, 21
+mov cl, 1
+xor dh, dh
+call disk_to_buffer
 
-        advance_ds:
-            mov ax, ds
-            add ax, 0x1000
-            mov ds, ax
-            inc sp ; for debugging purposes
-
-        skip:
-            loop cpy_frm_bfr
-
-    inc si
-    cmp si, 22  ; 21 - number of cylinders to cover 384 Kbytes
-    ;cmp si, 21  ; 21 - number of cylinders to cover 384 Kbytes
-    jne c_loop
-
-mov ax, [CODE_LOCATION]
-mov ds, ax
+mov cx, 0xC00
+mov si, 1
+call buffer_to_cs
 
 xor bp, bp
-mov cx, 1024
-mov bx, 512 ; offset
+;mov cx, 0x1800
+mov cx, 0x200
+mov bx, 0xe800
+
+mov ax, 0x7000
+mov es, ax
 
 xor ax, ax
 l3:
     mov ah, 0xE
-    mov al, byte [ds:bx]
-    add bp, ax
+    mov al, byte [es:bx]
     int 0x10
 
-    mov ah, byte [ds:bx]
-    add bp, ax
+    ;mov al, byte [es:bx]
+    ;add bp, ax
 
     inc bx
     loop l3
@@ -114,8 +104,43 @@ loop:
     jmp loop
 
 msg db "Hello, World!", 0
-CODE_LOCATION dw 0x2000
-BUFF_LOCATION dw 0x80
+
+CODE_ADDR dw 0x2000
+BUFF_ADDR dw 0x1000
+
+xchg_ds_es:
+    push si
+    push di
+
+    mov si, es
+    mov di, ds
+    xchg si, di
+    mov es, si
+    mov ds, di
+
+    pop di
+    pop si
+    ret
+
+buffer_to_cs:
+    _loop:
+        movsw
+
+        cmp di, 0
+        jnz skip
+        mov ax, es
+        add ax, 0x1000
+        mov es, ax
+        
+        skip:
+            loop _loop
+    ret
+
+disk_to_buffer:
+    call xchg_ds_es
+    int 0x13
+    call xchg_ds_es
+    ret
 
 times  510 - ($ - $$) db 0
 dw 0xaa55
