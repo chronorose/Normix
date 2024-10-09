@@ -4,12 +4,11 @@ run: all
 all: boot
 	dd if=/dev/zero of=./build/boot.img bs=1024 count=1440
 	dd if=./build/boot.bin of=./build/boot.img conv=notrunc
-	dd if=./dummy.txt of=./build/boot.img conv=notrunc seek=1
+	dd if=./gen of=./build/boot.img conv=notrunc seek=1
 
 boot:
 	nasm -fbin boot.asm -o ./build/boot.bin
-	# nasm -f elf16 boot.asm -o ./build/boot.o
-	# ld ./build/boot.o -o ./build/boot
+
 kloader:
 	nasm -fbin kloader.asm -o ./build/kloader.bin
 clean:
