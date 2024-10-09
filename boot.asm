@@ -24,56 +24,68 @@ l1:
 
 ; Loading kernel
 
-xor cx, cx
-
 mov ax, [CODE_ADDR]
 mov es, ax
 
 mov ax, [BUFF_ADDR]
 mov ds, ax
 
+xor cx, cx
+xor di, di
+xor bp, bp
 cloop:
-    xor dx, dx
-    mov bx, 1
-    push cx
-    hloop:
-        push dx
 
+    push ax
+    push cx
+    mov ah, 0xE
+    add cl, 0x30
+    mov al, cl
+    int 0x10
+    pop cx
+    pop ax
+
+    mov bx, 1
+    xor dh, dh
+    push cx ; ?
+    write_head:
+        push cx
         mov ah, 0x2
         mov al, 18
-        mov ch, cl ; moving cylinder iterator in ch
+        mov ch, cl
         mov cl, 1
-
-        mov dh, dl
-
+        xor dh, 0
         call disk_to_buffer
+        pop cx
 
+        push cx
+        push dx
+        mov dx, 0x2400 ; nbytes
+        mov si, 1
+        call buffer_to_cs
         pop dx
-        
-        add bx, 0x2400
-        inc dx
-        cmp dx, 2
-        jl hloop
+        pop cx
 
-    mov cx, 0x2400
-    mov si, 1
-    call buffer_to_cs
-
-    pop cx
-
+        ;add bx, 0x2400
+        inc bp
+        xor dh, 1
+        jnz write_head
+    pop cx ; ?
     inc cx
-    cmp cx, 21
+    cmp cx, 49
     jl cloop
 
 ; -------------------
 
-; Loading remaining 6 KB
+;jmp $
+; pmemsave 0x10001 0x6E000 out.mem
+; Loading remaining 7 KB
 
 mov ah, 0x2
 mov al, 12
 mov ch, 21
 mov cl, 1
 xor dh, dh
+mov bx, 1
 call disk_to_buffer
 
 mov cx, 0xC00
@@ -81,8 +93,7 @@ mov si, 1
 call buffer_to_cs
 
 xor bp, bp
-;mov cx, 0x1800
-mov cx, 0x200
+mov cx, 1024
 mov bx, 0xe800
 
 mov ax, 0x7000
@@ -94,8 +105,9 @@ l3:
     mov al, byte [es:bx]
     int 0x10
 
-    ;mov al, byte [es:bx]
-    ;add bp, ax
+    xor ax, ax
+    mov al, byte [es:bx]
+    add bp, ax
 
     inc bx
     loop l3
@@ -105,24 +117,19 @@ loop:
 
 msg db "Hello, World!", 0
 
-CODE_ADDR dw 0x2000
-BUFF_ADDR dw 0x1000
+CODE_ADDR dw 0x1000
+BUFF_ADDR dw 0x7E0
 
 xchg_ds_es:
-    push si
-    push di
-
-    mov si, es
-    mov di, ds
-    xchg si, di
-    mov es, si
-    mov ds, di
-
-    pop di
-    pop si
+    mov dx, es
+    mov cx, ds
+    mov es, cx
+    mov ds, dx
     ret
 
 buffer_to_cs:
+    mov cx, dx
+    shr cx, 1
     _loop:
         movsw
 
@@ -137,9 +144,19 @@ buffer_to_cs:
     ret
 
 disk_to_buffer:
+    push dx
+    push cx
     call xchg_ds_es
+    pop cx
+    pop dx
+
     int 0x13
+
+    push dx
+    push cx
     call xchg_ds_es
+    pop cx
+    pop dx
     ret
 
 times  510 - ($ - $$) db 0
