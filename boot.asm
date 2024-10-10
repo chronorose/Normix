@@ -11,7 +11,6 @@ read_cylinder:
     mov ax, 0xF80
     mov ds, ax
     mov bp, 25
-    xor bx, bx
     xor cx, cx
     xor dh, dh
 RCLP:
