@@ -1,5 +1,6 @@
 [BITS 16]
 
+; clear interrupt-enable flag
 cli
 cld
 xor ax, ax
@@ -42,6 +43,7 @@ write_buf:
     dec bp
     jnz RCLP
 
+; stop instruction execution
 hlt
 
 swap_segments:
@@ -52,5 +54,7 @@ swap_segments:
     ret
 
 msg db 'Hello, World!', 0
-times  510 - ($-$$) db 0
+
+; generate zero bytes to size 510
+times  510 - ($ - $$) db 0
 dw 0xaa55
