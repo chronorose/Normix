@@ -4,7 +4,7 @@ cli
 cld
 xor ax, ax
 mov ss, ax 
-mov sp, 0x7c00 
+mov sp, 0x7000 
 
 read_cylinder:
     mov ax, 0xF80
@@ -12,7 +12,6 @@ read_cylinder:
     mov bp, 25
     xor bx, bx
     xor cx, cx
-    xor di, di
     xor dh, dh
 RCLP:
     mov ax, 0x7E0
@@ -28,21 +27,19 @@ read_sectors:
     xor dh, 1
     jnz read_sectors
     inc ch
-    push cx
-    mov cx, 0x2400
 write_buf:
     call swap_segments
     xor si, si
     xor di, di
+    mov ax, 0x2400
 .WBL:
     movsw
-    dec cx 
+    dec ax 
     jnz .WBL
     mov ax, es 
     add ax, 0x480
     mov ds, ax
     dec bp
-    pop cx
     jnz RCLP
 
 hlt

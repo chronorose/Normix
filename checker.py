@@ -1,5 +1,5 @@
 gen = open("gen", "rb")
-from_vm = open("kok", "rb")
+from_vm = open("to_check", "rb")
 asm = open("build/boot.bin", "rb")
 gen_str = gen.read()
 from_vm_str = from_vm.read()
