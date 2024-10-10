@@ -57,20 +57,6 @@ skip:
     jmp l2
 end:
 
-jmp $
-
-l3:
-    mov ah, 0xE
-    mov al, byte [es:bx]
-    int 0x10
-
-    xor ax, ax
-    mov al, byte [es:bx]
-    add bp, ax
-
-    inc bx
-    loop l3
-
 loop:
     jmp loop
 

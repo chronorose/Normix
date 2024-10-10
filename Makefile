@@ -12,4 +12,4 @@ boot:
 kloader:
 	nasm -fbin kloader.asm -o ./build/kloader.bin
 clean:
-	rm ./build/*
+	rm ./build/* mem.dump gen

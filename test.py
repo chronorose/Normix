@@ -1,4 +1,6 @@
+#!/bin/python3
 import random
+import sys
 
 
 def gen(fpath):
@@ -17,6 +19,8 @@ def getbytesum(fpath):
             s += content[i]
     return s
 
-
-print(getbytesum("./gen") + getbytesum("./build/boot.bin"))
-print(getbytesum("./mem.dump"))
+if sys.argv[1] == "gen":
+    gen(sys.argv[2])
+elif sys.argv[1] == "test":
+    print(getbytesum(sys.argv[2]) + getbytesum(sys.argv[3]))
+    print(getbytesum(sys.argv[4]))
