@@ -22,6 +22,7 @@ mov al, 0x1
 l2:
     push ax
     int 0x13
+    jc l2
     pop ax
 
     add bx, 0x200
