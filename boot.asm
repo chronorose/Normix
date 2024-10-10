@@ -4,8 +4,9 @@ mov ax, 0x7C0
 mov ds, ax
 
 cli
+xor ax, ax
 mov ss, ax
-xor sp, sp
+mov sp, 0x7C00
 sti
 cld
 
