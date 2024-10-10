@@ -1,32 +1,31 @@
 [BITS 16]
 
-; clear interrupt-enable flag
-cli
+cli; clear interrupt-enable flag
 cld
 
 mov sp, 0x7C00 
 
 read_cylinder:
     mov ax, 0xF80
-    mov ds, ax
-    mov bp, 25
-    xor cx, cx
+    mov ds, ax; data segment
+    mov bp, 25; count of cylinders
+    xor cx, cx; cylinder and sector
     mov ss, cx
-    xor dh, dh
+    xor dh, dh; number of head
 RCLP:
     mov ax, 0x7E0
-    mov es, ax
+    mov es, ax; buffer es::bx
     xor bx, bx
 read_sectors:
-    mov al, 0x12 
-    mov ah, 0x2
-    mov cl, 0x1
-    int 0x13 
-    jc read_sectors
-    add bx, 0x2400
+    mov al, 0x12; count of reading sectors
+    mov ah, 0x2; function - read sectors from driver
+    mov cl, 0x1; number of sector
+    int 0x13
+    jc read_sectors; c-flag if was error
+    add bx, 0x2400; 
     xor dh, 1
     jnz read_sectors
-    inc ch
+    inc ch; number of cylinder
 write_buf:
     call swap_segments
     xor si, si
