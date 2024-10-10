@@ -1,28 +1,50 @@
 [BITS 16]
 
-; clear interrupt-enable flag
 cli
-mov ax, 0x7C0
+xor ax, ax
 mov ss, ax
-xor sp, sp
-mov ah, 0xe
-mov si, msg
+mov sp, 0x7C00
+sti
 cld
 
+; Loading kernel
+
+mov ax, 0x2000
+mov es, ax
+
+mov si, 6
+xor bx, bx
+xor dh, dh
+mov cl, 0x1
+mov ah, 0x2
+mov al, 0x1
+
+l2:
+    push ax
+    int 0x13
+    jc l2
+    pop ax
+
+    add bx, 0x200
+    jnc skip
+    mov di, es
+    add di, 0x1000
+    mov es, di
+    dec si
+    jz end
+skip:
+    inc cl
+    cmp cl, 19
+    jl l2
+    mov cl, 1
+    xor dh, 1
+    jnz l2
+    inc ch
+    jmp l2
+end:
+
 loop:
-  ; read byte from ss:si into al, si++
-  ss lodsb
-  ; ah = 0xe (display char), al = char
-  int 0x10
-  ; logical AND and setting flags
-  test al, al
-  jnz loop
+    jmp loop
 
-; stop instruction execution
-hlt
-
-msg db 'Hello, World!', 0
-
-; generate zero bytes to size 510
 times  510 - ($ - $$) db 0
 dw 0xaa55
