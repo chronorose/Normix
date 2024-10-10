@@ -4,7 +4,7 @@ cli
 cld
 xor ax, ax
 mov ss, ax 
-mov sp, 0x7000 
+mov sp, 0x7C00 
 
 read_cylinder:
     mov ax, 0xF80
