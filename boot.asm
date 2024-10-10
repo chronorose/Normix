@@ -1,8 +1,5 @@
 [BITS 16]
 
-mov ax, 0x7C0
-mov ds, ax
-
 cli
 xor ax, ax
 mov ss, ax
@@ -10,22 +7,9 @@ mov sp, 0x7C00
 sti
 cld
 
-; Printing 'Hello world!'
-
-mov cl, 0xD
-mov bx, msg
-
-l1:
-    mov ah, 0xE
-    mov al, byte [bx]
-    int 0x10
-
-    inc bx
-    loop l1
-
 ; Loading kernel
 
-mov ax, [CODE_ADDR]
+mov ax, 0x2000
 mov es, ax
 
 mov si, 6
@@ -60,9 +44,6 @@ end:
 
 loop:
     jmp loop
-
-msg db "Hello, World!", 0
-CODE_ADDR dw 0x2000
 
 times  510 - ($ - $$) db 0
 dw 0xaa55
