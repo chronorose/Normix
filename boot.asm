@@ -2,8 +2,7 @@
 
 cli
 cld
-xor ax, ax
-mov ss, ax 
+
 mov sp, 0x7C00 
 
 read_cylinder:
@@ -11,6 +10,7 @@ read_cylinder:
     mov ds, ax
     mov bp, 25
     xor cx, cx
+    mov ss, cx
     xor dh, dh
 RCLP:
     mov ax, 0x7E0
