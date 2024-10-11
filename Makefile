@@ -9,7 +9,5 @@ all: boot
 boot:
 	nasm -fbin boot.asm -o ./build/boot.bin
 
-kloader:
-	nasm -fbin kloader.asm -o ./build/kloader.bin
 clean:
 	rm ./build/* mem.dump gen

@@ -1,50 +1,56 @@
 [BITS 16]
 
-cli
-xor ax, ax
-mov ss, ax
-mov sp, 0x7C00
-sti
-cld
+cli; clear interrupt-enable flag
+cld; clear derection flag, if df = 0 string ooperations increment
 
-; Loading kernel
+mov sp, 0x7C00 
 
-mov ax, 0x2000
-mov es, ax
-
-mov si, 6
-xor bx, bx
-xor dh, dh
-mov cl, 0x1
-mov ah, 0x2
-mov al, 0x1
-
-l2:
-    push ax
+read_cylinder:
+    mov ax, 0xF80
+    mov ds, ax
+    mov bp, 25
+    xor cx, cx
+    mov ss, cx
+    xor dh, dh
+RCLP:
+    mov ax, 0x7E0
+    mov es, ax
+    xor bx, bx
+read_sectors:
+    mov al, 0x12; count of reading sectors
+    mov ah, 0x2; function - read sectors from driver
+    mov cl, 0x1; number of sector
     int 0x13
-    jc l2
-    pop ax
+    jc read_sectors; c-flag if was error
+    add bx, 0x2400
+    xor dh, 1; next head
+    jnz read_sectors; second iteration if dh = 0
+    inc ch; next number of cylinder
+write_buf:
+    call swap_segments; swap ds and es
+    xor si, si
+    xor di, di
+    mov ax, 0x2400
+.WBL:
+    movsw; move word(2 bytes) from address ds:si to es:di (from buffer to data)
+    dec ax 
+    jnz .WBL
+    mov ax, es 
+    add ax, 0x480
+    mov ds, ax; shift by 18 kb
+    dec bp
+    jnz RCLP
 
-    add bx, 0x200
-    jnc skip
-    mov di, es
-    add di, 0x1000
-    mov es, di
-    dec si
-    jz end
-skip:
-    inc cl
-    cmp cl, 19
-    jl l2
-    mov cl, 1
-    xor dh, 1
-    jnz l2
-    inc ch
-    jmp l2
-end:
+hlt; stop instruction execution
 
-loop:
-    jmp loop
+swap_segments:; swap ds and es
+    mov ax, ds
+    mov si, es
+    mov ds, si
+    mov es, ax
+    ret
 
-times  510 - ($ - $$) db 0
+msg db 'Hello, World!', 0
+times  510 - ($-$$) db 0
+>>>>>>> load_kernel
 dw 0xaa55
