@@ -12,6 +12,7 @@ read_cylinder:
     xor cx, cx
     mov ss, cx
     xor dh, dh
+
 RCLP:
     mov ax, 0x7E0
     mov es, ax
@@ -31,17 +32,40 @@ write_buf:
     xor si, si
     xor di, di
     mov ax, 0x2400
-.WBL:
+WBL:
     movsw; move word(2 bytes) from address ds:si to es:di (from buffer to data)
     dec ax 
-    jnz .WBL
+    jnz WBL
     mov ax, es 
     add ax, 0x480
     mov ds, ax; shift by 18 kb
     dec bp
     jnz RCLP
 
-hlt; stop instruction execution
+cli
+mov ax, 0x7C0
+mov ds, ax
+lgdt [gdt_descriptor]
+
+mov eax, cr0
+or al, 1
+mov cr0, eax
+
+jmp CODE_SEG:protected_mode_trampoline + 0x7C00
+
+[BITS 32]
+
+protected_mode_trampoline:
+
+    mov ax, DATA_SEG
+    mov ds, ax
+    mov ss ,ax
+    mov es ,ax
+    mov fs ,ax
+    mov gs ,ax
+
+    mov esp, 0xFA00
+    jmp CODE_SEG:0xFA00
 
 swap_segments:; swap ds and es
     mov ax, ds
@@ -50,7 +74,19 @@ swap_segments:; swap ds and es
     mov es, ax
     ret
 
-msg db 'Hello, World!', 0
+gdt_start:
+    dq 0x0
+    gdt_code:
+        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
+    gdt_data:
+        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
+gdt_end:
+
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start + 0xF800
+
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
 times  510 - ($-$$) db 0
->>>>>>> load_kernel
-dw 0xaa55
+dw 0xAA55
