@@ -61,7 +61,7 @@ mov eax, cr0
 or eax, 1
 mov cr0, eax
 
-jmp CODE_SEG:trampolin + 0x7c00
+jmp CODE_SEG:trampolin + 0xf800
 [BITS 32]
 trampolin:
     mov eax, DATA_SEG 
@@ -75,6 +75,13 @@ trampolin:
 
 ; stop instruction execution
 hlt
+
+GLOBAL sayhi
+
+sayhi:
+    mov byte [es:0xb8000], 0
+    mov byte [es:0xb8f9e],'i'
+    ret
 
 gdt_start:
     dq 0x0
