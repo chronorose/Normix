@@ -1,14 +1,15 @@
 [BITS 16]
 
+global _start
+extern kmain
+
+section .text
+_start:
 ; clear interrupt-enable flag
 cli
 cld
 
 mov sp, 0x7C00 
-mov ax, 0x7c0
-mov ds, ax
-mov ax, [gdt_code]
-mov ax, [gdt_data]
 
 ;; this is the sacred code of omnissiah
 ;; do not touch it under no circumstances
@@ -71,17 +72,11 @@ trampolin:
     mov gs, ax
     mov ss, ax
     mov esp, 0xf800
-    jmp CODE_SEG:0xfa00
+    call CODE_SEG:kmain
+    ;jmp CODE_SEG:0xf800
 
 ; stop instruction execution
 hlt
-
-GLOBAL sayhi
-
-sayhi:
-    mov byte [es:0xb8000], 0
-    mov byte [es:0xb8f9e],'i'
-    ret
 
 gdt_start:
     dq 0x0
