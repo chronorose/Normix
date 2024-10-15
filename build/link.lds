@@ -2,7 +2,7 @@ OUTPUT("elf32-i386")
 OUTPUT_ARCH(i386)
 ENTRY(_start)
 SECTIONS {
-    . = 0x0;
+    . = 0xf800;
     .boot : AT(0x7c00)
     {
         build/boot.out(.text)

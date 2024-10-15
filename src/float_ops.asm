@@ -1,9 +1,13 @@
 [BITS 32]
 
 ; this is helper file, calling various assembly instructions from C
+
 GLOBAL sqrt
+GLOBAL cos
+GLOBAL sin
+
 section .text
-; takes an argument 
+
 sqrt:
     fld dword [esp + 4]
     fsqrt

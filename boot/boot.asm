@@ -66,7 +66,7 @@ init_video:
 
 
 ;; sacred code of omnissiah has ended. you may touch further
-mov ax, 0xf80
+xor ax, ax
 mov ds, ax
 lgdt [gdt_descriptor]
 
@@ -79,7 +79,7 @@ mov cr0, eax
 ;or ax, 3 << 9
 ;mov cr4, eax
 
-jmp CODE_SEG:trampolin + 0x7c00
+jmp CODE_SEG:trampolin ;+ 0xf800
 [BITS 32]
 trampolin:
     mov eax, DATA_SEG 
@@ -89,11 +89,9 @@ trampolin:
     mov gs, ax
     mov ss, ax
     mov esp, 0xf800
-    call CODE_SEG:kmain
-    ;jmp CODE_SEG:0xf800
+    call kmain
 
-; stop instruction execution
-hlt
+jmp $
 
 gdt_start:
     dq 0x0
@@ -104,7 +102,7 @@ gdt_data:
 gdt_end:
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd gdt_start + 0xf800
+    dd gdt_start ;+ 0xf800
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start

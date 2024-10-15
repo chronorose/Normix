@@ -3,13 +3,13 @@
 
 void text_mode() {
     vga_clear_screen();
-    for (int i = 0; i < 30; i++) {
-        for (int j = 0; j < i; j++) {
-            fprint(" ");
-        }
-        fprint("%d\n", i);
-    }
-    /*vga_print_float(13.74, 2);*/
+    /*for (int i = 0; i < 30; i++) {*/
+    /*    for (int j = 0; j < i; j++) {*/
+    /*        fprint(" ");*/
+    /*    }*/
+    /*    fprint("%d\n", i);*/
+    /*}*/
+    vga_print_float(sqrt(100.), 2);
     /*for (int i = 0; i < 1200; i++) {*/
     /*    vga_print_str(" ");*/
     /*    vga_print_udec(i);*/
