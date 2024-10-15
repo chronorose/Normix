@@ -2,11 +2,13 @@
 
 #define VIDEO 0xb8000
 
-// TODO: make types for cursor and for points and beatify stuff.
-
 typedef char* va_list;
 #define va_start(xs, x) ({(xs) = (char*)(&x + 1);})
-#define va_arg(xs, type) ({type l = (type)(*((type*)xs)); xs += 4; l;})
+#define va_arg(res, xs, type) \
+        do { \
+        res = (type)(*((type*)xs)); \
+        xs += 4; \
+        } while (0);
 
 typedef struct {
     unsigned int x;
@@ -56,21 +58,33 @@ void fprint(char* fmt, ...) {
                 char spec = *(fmt + 1);
                 switch (spec) {
                     case 'd':
-                        vga_print_udec(va_arg(xs, int));
-                        fmt++;
+                        {
+                            int loc;
+                            va_arg(loc, xs, int)
+                            vga_print_udec(loc);
+                            fmt++;
+                        }
                         break;
                     case 'x':
-                        vga_print_uhex(va_arg(xs, int));
-                        fmt++;
+                        {
+                            int loc;
+                            va_arg(loc, xs, int);
+                            vga_print_uhex(loc);
+                            fmt++;
+                        }
                         break;
                     case 's':
-                        vga_print_str(va_arg(xs, char*));
+                        {
+                        char* loc;
+                        va_arg(loc, xs, char*);
+                        vga_print_str(loc);
                         fmt++;
+                        }
                         break;
-                    case 'f':
-                        vga_print_float(va_arg(xs, float), 2);
-                        fmt++;
-                        break;
+                    /*case 'f':*/
+                    /*    vga_print_float(va_arg(xs, float), 2);*/
+                    /*    fmt++;*/
+                    /*    break;*/
                     case '%':
                         vga_print_char(s);
                         fmt++;

@@ -79,7 +79,6 @@ mov cr0, eax
 ;or ax, 3 << 9
 ;mov cr4, eax
 
-
 jmp CODE_SEG:trampolin + 0x7c00
 [BITS 32]
 trampolin:
