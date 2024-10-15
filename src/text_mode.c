@@ -4,11 +4,7 @@
 
 typedef char* va_list;
 #define va_start(xs, x) ({(xs) = (char*)(&x + 1);})
-#define va_arg(res, xs, type) \
-        do { \
-        res = (type)(*((type*)xs)); \
-        xs += 4; \
-        } while (0);
+#define va_arg(xs, type) ({type l = (type)(*((type*)xs)); xs += sizeof(type); l;})
 
 typedef struct {
     unsigned int x;
@@ -59,32 +55,26 @@ void fprint(char* fmt, ...) {
                 switch (spec) {
                     case 'd':
                         {
-                            int loc;
-                            va_arg(loc, xs, int)
-                            vga_print_udec(loc);
+                            vga_print_udec(va_arg(xs, int));
                             fmt++;
                         }
                         break;
                     case 'x':
                         {
-                            int loc;
-                            va_arg(loc, xs, int);
-                            vga_print_uhex(loc);
+                            vga_print_uhex(va_arg(xs, int));
                             fmt++;
                         }
                         break;
                     case 's':
                         {
-                        char* loc;
-                        va_arg(loc, xs, char*);
-                        vga_print_str(loc);
+                        vga_print_str(va_arg(xs, char*));
                         fmt++;
                         }
                         break;
-                    /*case 'f':*/
-                    /*    vga_print_float(va_arg(xs, float), 2);*/
-                    /*    fmt++;*/
-                    /*    break;*/
+                    case 'f':
+                        vga_print_float(va_arg(xs, float), 2);
+                        fmt++;
+                        break;
                     case '%':
                         vga_print_char(s);
                         fmt++;
