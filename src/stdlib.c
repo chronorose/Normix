@@ -1,3 +1,5 @@
+#include "stdlib.h"
+
 void kmemmove(void* dest, const void* src, int count) {
     char* d = dest;
     const char* s = src;

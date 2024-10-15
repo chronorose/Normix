@@ -1,42 +1,44 @@
-CFLAGS := -m32 -ffreestanding -fno-pie -gdwarf-4 -ggdb3 -fno-stack-protector
+CFLAGS := -m32 -mno-sse -ffreestanding -fno-pie -gdwarf-4 -ggdb3 -fno-stack-protector
 BUILD := build/
 SRC := src/
+BOOT := boot/
 btldr := $(BUILD)boot.bin $(BUILD)boot.img $(BUILD)boot.elf
 kernel := $(BUILD)kernel.o $(BUILD)kernel.bin $(BUILD)kernel.tmp
+mode := TEXT 
 
-run: compile
+ifdef GRAPHICS
+	mode = GRAPHICS
+endif
+
+run: link 
 	qemu-system-i386 -s -monitor stdio -blockdev driver=file,node-name=f0,filename=$(BUILD)boot.img -device floppy,drive=f0
 
-debug: compile
+debug: link 
 	qemu-system-i386 -s -monitor stdio -S -blockdev driver=file,node-name=f0,filename=$(BUILD)boot.img -device floppy,drive=f0
 
-bochs_debug: compile
+bochs_debug: link 
 	bochs -qf ./setup/bochsrc
 
-bochs_run: compile
+bochs_run: link 
 	bochs -qf ./setup/bochsrc -rc ./setup/setup
 
-ccompile_part:
+ccompile:
 	touch $(kernel)
 	rm $(kernel)
-	gcc $(CFLAGS) -c $(wildcard $(SRC)*.c)
-ccompile: ccompile_part
-	mv $(wildcard *.o) $(BUILD)
+	gcc $(CFLAGS) -D$(mode) -c $(wildcard $(SRC)*.c)
+	mv *.o $(BUILD)
 
-compile:ccompile
+compile_asm: ccompile
 	touch $(btldr)
 	rm $(btldr) 
 
-	# assembly bootloader and link it for gdb
-	nasm -f elf $(SRC)boot.asm -F dwarf -g -o $(BUILD)boot.out
-	# objcopy -g -O binary $(BUILD)boot $(BUILD)boot.bin
-	# ld -m elf_i386 -o $(BUILD)boot.elf -Ttext 0x0 $(BUILD)boot
-	# objcopy -g -I elf32-i386 -O binary $(BUILD)boot.elf $(BUILD)boot.bin
+	nasm -f elf $(BOOT)boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
+	nasm -f elf $(SRC)*.asm -F dwarf -g -d$(mode) -o $(BUILD)asm.o
 
+link: compile_asm
 	# link compiled kernel with bootloader and make it a binary
 	ld -m elf_i386 -o $(BUILD)kernel.elf -T ./build/link.lds $(wildcard $(BUILD)*.o)
 	objcopy -g -I elf32-i386 -O binary $(BUILD)kernel.elf $(BUILD)kernel.bin
 
 	dd if=/dev/zero of=$(BUILD)boot.img bs=1024 count=1440
-	# dd if=$(BUILD)boot.bin of=$(BUILD)boot.img conv=notrunc
 	dd if=$(BUILD)kernel.bin of=$(BUILD)boot.img conv=notrunc seek=0

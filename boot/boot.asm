@@ -53,16 +53,34 @@ WBL:
     dec bp
     jnz RCLP
 
+init_video:
+    fninit
+    mov ah, 0x0
+%ifdef TEXT
+    mov al, 0x3 ; this is where either 0x3(text mode) or 0x13(graphics mode) go
+%endif
+%ifdef GRAPHICS
+    mov al, 0x13
+%endif
+    int 0x10
+
+
 ;; sacred code of omnissiah has ended. you may touch further
 mov ax, 0xf80
 mov ds, ax
 lgdt [gdt_descriptor]
 
 mov eax, cr0
-or eax, 1
+or eax, 1 
+;or eax, 3 
+;and ax, 0xFFFB
 mov cr0, eax
+;mov eax, cr4
+;or ax, 3 << 9
+;mov cr4, eax
 
-jmp CODE_SEG:trampolin + 0xf800
+
+jmp CODE_SEG:trampolin + 0x7c00
 [BITS 32]
 trampolin:
     mov eax, DATA_SEG 
