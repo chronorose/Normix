@@ -25,7 +25,9 @@ void text_mode() {
 #include "font_render.h"
 
 void graphics_mode() {
-    render('a');
+    for(int i = 0; i < 60; i++) {
+        render('a');
+    }
     /*fill_rect(10, 10, 100, 100, 3);*/
 
     /*for (int y = 0; y < 200; y += 2) {*/

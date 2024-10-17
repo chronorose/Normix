@@ -13,29 +13,38 @@ Cursor cursor = {0, 0};
 void gscroll() {
     kmemmove(((short int*)VIDEO), ((short int*)VIDEO + 40), 40 * 18);
     for (int i = 0; i < 20; i++) {
-        put(i, 19, 0);
+        put(i, 190, 0);
     }
 }
 
+void lfcheck() {
+    if (cursor.x + 7 >= 320) {
+        cursor.y += 9;
+        cursor.x = 0;
+    }
+    if (cursor.y >= 200) {
+        gscroll();
+        cursor.y = 190;
+    }
+}
+
+void inc_cursor() {
+    cursor.x += 7;
+    lfcheck();
+}
+
 void render(char letter) {
+    lfcheck();
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 7; j++) {
             if (font[letter][i][j]) {
-                put(j, i, 0x2);
+                put(cursor.x + j, cursor.y + i, 0x3);
             }
         }
     }
+    inc_cursor();
 }
 
 void render_letter(char l) {
     render(l);
-    cursor.x++;
-    if (cursor.x >= 39) {
-        cursor.y++;
-        cursor.x = 0;
-    }
-    if (cursor.y >= 20) {
-        gscroll();
-        cursor.y = 19;
-    }
 }
