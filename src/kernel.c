@@ -22,9 +22,11 @@ void text_mode() {
 
 #ifdef GRAPHICS 
 #include "graphics_mode.h"
+#include "font_render.h"
 
 void graphics_mode() {
-    fill_rect(10, 10, 100, 100, 3);
+    render('a');
+    /*fill_rect(10, 10, 100, 100, 3);*/
 
     /*for (int y = 0; y < 200; y += 2) {*/
     /*    for (int x = 0; x < 320; x += 2) {*/
