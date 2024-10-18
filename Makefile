@@ -12,3 +12,17 @@ kernel:
 	objcopy -I pe-i386 -O binary ./build/kernel.tmp ./build/kernel.bin
 clean:
 	rm ./build/* mem.dump gen
+test:
+	nasm -f elf32 -F dwarf -g boot.asm -o ./build/boot.o
+	objcopy -I elf32-i386 -O binary ./build/boot.o ./build/boot.bin
+
+	gcc -m32 -g -fno-pie -ffreestanding -c -o ./build/kernel.o kernel.c
+	# ld -m elf_i386 -o ./build/kernel.elf -Ttext 0xf800 ./build/boot.o ./build/kernel.o
+	ld -m elf_i386 -o ./build/kernel.elf -T ld_script ./build/boot.o ./build/kernel.o
+	objcopy -I elf32-i386 -O binary ./build/kernel.elf ./build/kernel.bin
+
+	dd if=/dev/zero of=./build/boot.img bs=1024 count=1440
+	dd if=./build/kernel.bin of=./build/boot.img conv=notrunc
+	# dd if=./build/boot.bin of=./build/boot.img conv=notrunc
+	# dd if=./build/kernel.bin of=./build/boot.img conv=notrunc seek=1
+	qemu-system-i386 -s -S -monitor stdio -blockdev driver=file,node-name=f0,filename=./build/boot.img -device floppy,drive=f0

@@ -1,0 +1,10 @@
+SECTIONS
+{
+    ENTRY(kernel_entry)
+    .btext 0xf800 : AT(0x7c00) {
+        ./build/boot.o(.text)
+    }
+    .ktext 0xfa00 : AT(ADDR (.btext) + SIZEOF (.btext)) {
+        ./build/kernel.o(.text)
+    }
+}

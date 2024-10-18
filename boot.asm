@@ -3,10 +3,10 @@
 cli; clear interrupt-enable flag
 cld; clear derection flag, if df = 0 string ooperations increment
 
-mov sp, 0x7C00 
+mov sp, 0x7c00 
 
 read_cylinder:
-    mov ax, 0xF80
+    mov ax, 0xf80
     mov ds, ax
     mov bp, 25
     xor cx, cx
@@ -14,7 +14,7 @@ read_cylinder:
     xor dh, dh
 
 RCLP:
-    mov ax, 0x7E0
+    mov ax, 0x7e0
     mov es, ax
     xor bx, bx
 read_sectors:
@@ -43,7 +43,7 @@ WBL:
     jnz RCLP
 
 cli
-mov ax, 0x7C0
+mov ax, 0xf80
 mov ds, ax
 lgdt [gdt_descriptor]
 
@@ -51,21 +51,23 @@ mov eax, cr0
 or al, 1
 mov cr0, eax
 
-jmp CODE_SEG:protected_mode_trampoline + 0x7C00
+jmp CODE_SEG:protected_mode_trampoline + 0xf800
 
 [BITS 32]
 
 protected_mode_trampoline:
 
-    mov ax, DATA_SEG
-    mov ds, ax
-    mov ss ,ax
-    mov es ,ax
-    mov fs ,ax
-    mov gs ,ax
+    mov eax, DATA_SEG
+    mov ds, eax
+    mov ss ,eax
+    mov es ,eax
+    mov fs ,eax
+    mov gs ,eax
 
-    mov esp, 0xFA00
-    jmp CODE_SEG:0xFA00
+    mov sp, 0xf800
+    ;[extern kernel_entry]
+    ;call kernel_entry
+    jmp CODE_SEG:0xfa00
 
 swap_segments:; swap ds and es
     mov ax, ds
@@ -77,14 +79,14 @@ swap_segments:; swap ds and es
 gdt_start:
     dq 0x0
     gdt_code:
-        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
+        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0b10011010, 0xCF, 0x0
     gdt_data:
-        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
+        db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0b10010010, 0xCF, 0x0
 gdt_end:
 
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd gdt_start + 0xF800
+    dd gdt_start + 0xf800
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
