@@ -43,7 +43,7 @@ WBL:
     jnz RCLP
 
 cli
-mov ax, 0xf80
+xor ax, ax
 mov ds, ax
 lgdt [gdt_descriptor]
 
@@ -51,7 +51,7 @@ mov eax, cr0
 or al, 1
 mov cr0, eax
 
-jmp CODE_SEG:protected_mode_trampoline + 0xf800
+jmp CODE_SEG:protected_mode_trampoline
 
 [BITS 32]
 
@@ -65,9 +65,8 @@ protected_mode_trampoline:
     mov gs ,eax
 
     mov sp, 0xf800
-    ;[extern kernel_entry]
-    ;call kernel_entry
-    jmp CODE_SEG:0xfa00
+    [extern kernel_entry]
+    call kernel_entry
 
 swap_segments:; swap ds and es
     mov ax, ds
@@ -86,7 +85,7 @@ gdt_end:
 
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd gdt_start + 0xf800
+    dd gdt_start
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
