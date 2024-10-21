@@ -30,7 +30,7 @@ void printer_init(void) {
 
 void scroll(void) {
     memmove((void*)BUFFER, (void*)((hword_t*)BUFFER + NCOLS), NCOLS * (NROWS - 1) * 2);
-    memset(XY_TO_ADDR(0, NROWS - 1), 0, NCOLS);
+    memset(XY_TO_ADDR(0, NROWS - 1), 0, NCOLS * 2);
 }
 
 void advance(int *x, int *y) {
@@ -46,7 +46,8 @@ void advance(int *x, int *y) {
 }
 
 void vga_print_char(char s, int x, int y) {
-    *(XY_TO_ADDR(x, y)) = SYMBOL(s,
+    *(XY_TO_ADDR(x, y)) = SYMBOL(
+            s,
             printer.bckgrnd,
             printer.frgrnd);
 }

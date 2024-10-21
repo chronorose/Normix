@@ -10,7 +10,6 @@
 
 #define SYMBOL(ch,b,f) ((b << 12) | (f << 8) | (ch))
 
-typedef unsigned short int symbol_t;
 typedef unsigned short int hword_t;
 
 typedef enum {
@@ -33,7 +32,6 @@ void vga_clear_screen(void);
 
 void print(char *fmt, ...);
 
-symbol_t create_symbol(char ch);
 void advance(int *x, int *y);
 
 void printi(int d, int base);
