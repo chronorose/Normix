@@ -3,9 +3,11 @@
 
 #include "stdlib.h"
 
+void print(char ch);
 void fprint(char* fmt, ...);
+void error(char* err);
 void printgl(int x, int y, char ch, char fg, char bg);
-void print(char ch, char fg, char bg);
+void printc(char ch, char fg, char bg);
 void scroll();
 void vga_print_char(char symbol);
 void vga_print_str(char* str);

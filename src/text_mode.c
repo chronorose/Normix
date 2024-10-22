@@ -4,20 +4,27 @@
 
 typedef char* va_list;
 #define va_start(xs, x) ({(xs) = (char*)(&x + 1);})
-#define va_arg(xs, type) ({type l = (type)(*((type*)xs)); xs += sizeof(type); l;})
+#define va_arg(xs, type) ({type l = (*((type*)xs)); xs += (max(sizeof(type), 4)); l;})
 
 typedef struct {
     unsigned int x;
     unsigned int y;
+    unsigned char fg;
+    unsigned char bg;
 } Cursor;
 
-static Cursor cursor = (Cursor){0, 0};
+static Cursor cursor = (Cursor){0, 0, 0xb, 0x0};
 
 static char ntoc[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 static void set_cursor(int x, int y) {
     cursor.x = x;
     cursor.y = y;
+}
+
+static void set_color(unsigned char fg, unsigned char bg) {
+    cursor.fg = fg;
+    cursor.bg = bg;
 }
 
 static void inc_cursor() {
@@ -54,25 +61,19 @@ void fprint(char* fmt, ...) {
                 char spec = *(fmt + 1);
                 switch (spec) {
                     case 'd':
-                        {
                             vga_print_udec(va_arg(xs, int));
                             fmt++;
-                        }
                         break;
                     case 'x':
-                        {
                             vga_print_uhex(va_arg(xs, int));
                             fmt++;
-                        }
                         break;
                     case 's':
-                        {
-                        vga_print_str(va_arg(xs, char*));
-                        fmt++;
-                        }
+                            vga_print_str(va_arg(xs, char*));
+                            fmt++;
                         break;
                     case 'f':
-                        vga_print_float(va_arg(xs, float), 2);
+                        vga_print_float(va_arg(xs, double), 2);
                         fmt++;
                         break;
                     case '%':
@@ -92,35 +93,41 @@ void fprint(char* fmt, ...) {
     }
 }
 
-void print_gl(int x, int y, char ch, char fg, char bg) {
-    *(((short int*)VIDEO) + x + y * 80) = ch + (fg << 8) + (bg << 12);
+void print_gl(int x, int y, char ch, unsigned char fg, unsigned char bg) {
+    *(((short int*)VIDEO) + x + y * 80) = ch | (fg << 8) | (bg << 12);
 }
 
-void print(char ch, char fg, char bg) {
-    *(((short int*)VIDEO) + cursor.x + cursor.y * 80) = ch + (fg << 8) + (bg << 12);
+void printc(char ch, char fg, char bg) {
+    print_gl(cursor.x, cursor.y, ch, fg, bg);
+    inc_cursor();
+}
+
+void print(char ch) {
+    print_gl(cursor.x, cursor.y, ch, cursor.fg, cursor.bg);
     inc_cursor();
 }
 
 void scroll() {
     kmemmove(((short int*)VIDEO), ((short int*)VIDEO + 80) , 80 * 48);
-    for (int i = 0; i < 80; i++) {
-        print_gl(i, 24, 0, 0, 0);
-    }
+    kmemset((short int*)VIDEO + 24 * 80, 0, 80 * 2); // could be bugs here, not exactly tested. but looks right.
 }
 
 static void vga_print_rev(char* str, unsigned int counter) {
     for (; counter > 0; --counter) {
-        print(str[counter - 1], 0xb, 0);
+        print(str[counter - 1]);
     }
 }
 
 void vga_print_char(char symbol) {
-    print(symbol, 0xb, 0);
+    print(symbol);
 }
 
 void vga_print_uhex(unsigned int num) {
     char to_print[12] = {0}; 
     unsigned int counter = 0;
+    if (num == 0) {
+        to_print[counter++] = '0';
+    }
     while (num > 0) {
         to_print[counter++] = ntoc[num & 0xF];
         num >>= 4;
@@ -132,6 +139,9 @@ void vga_print_uhex(unsigned int num) {
 void vga_print_udec(unsigned int num) {
     char to_print[12] = {0}; 
     unsigned int counter = 0;
+    if (num == 0) {
+        to_print[counter++] = '0';
+    }
     while (num > 0) {
         to_print[counter++] = ntoc[num % 10];
         num /= 10;
@@ -141,12 +151,12 @@ void vga_print_udec(unsigned int num) {
 }
 
 void vga_print_float(float num, int precision) {
-    int n = (int)num;
+    unsigned int n = (unsigned int)num;
     vga_print_udec(n);
     vga_print_char('.');
     while (precision > 0) {
         num = (num - n) * 10;
-        n = (int) num;
+        n = (unsigned int) num;
         vga_print_char(ntoc[n]);
         --precision;
     }
@@ -155,16 +165,19 @@ void vga_print_float(float num, int precision) {
 
 void vga_print_str(char* str) {
     while(*str) {
-        print(*str++, 0xb, 0);
+        print(*str++);
     }
 }
 
+void error(char* err) {
+    set_color(0x4, 0);
+    vga_print_str(err);
+    set_color(0xb, 0);
+}
+
 void vga_clear_screen() {
-    for (int i = 0; i < 80; i++) {
-        for (int j = 0; j < 25; j++) {
-            print_gl(i, j, 0, 0, 0);
-        }
-    }
+    kmemset((char*)VIDEO, 0, 80 * 25 * 2);
+    set_cursor(0, 0);
 }
 
 void init_printer() {

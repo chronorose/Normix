@@ -11,5 +11,7 @@ extern float sin(float arg);
 #define PI_2 1.57079632679489661923
 
 void kmemmove(void* dest, const void* src, int count);
+int max(int a1, int a2);
+void kmemset(void* s, int c, unsigned int n);
 
 #endif

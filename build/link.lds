@@ -13,6 +13,7 @@ SECTIONS {
     {
         *(.text)
         *(.rodata)
+        *(.rodata.*)
         *(.data)
         *(.bss)
         *(COMMON)

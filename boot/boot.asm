@@ -72,12 +72,12 @@ lgdt [gdt_descriptor]
 
 mov eax, cr0
 or eax, 1 
-;or eax, 3 
-;and ax, 0xFFFB
+or eax, 3 
+and ax, 0xFFFB
 mov cr0, eax
-;mov eax, cr4
-;or ax, 3 << 9
-;mov cr4, eax
+mov eax, cr4
+or ax, 3 << 9
+mov cr4, eax
 
 jmp CODE_SEG:trampolin ;+ 0xf800
 [BITS 32]
@@ -92,6 +92,17 @@ trampolin:
     call kmain
 
 jmp $
+
+GLOBAL lidt_load
+lidt_load:
+    mov eax, [esp + 4]
+    lidt [eax]
+    ret
+
+GLOBAL inter
+inter:
+    int 0x0 
+    ret
 
 gdt_start:
     dq 0x0
