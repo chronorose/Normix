@@ -26,21 +26,16 @@ ccompile:
 	touch $(kernel)
 	rm $(kernel)
 	gcc $(CFLAGS) -D$(mode) -c $(SRC)stdlib.c -o $(BUILD)stdlib.o
+	gcc $(CFLAGS) -D$(mode) -c $(SRC)trampolines.c -o $(BUILD)trampolines.o
+	gcc $(CFLAGS) -D$(mode) -c $(SRC)alloc.c -o $(BUILD)alloc.o
 	gcc $(CFLAGS) -D$(mode) -c $(SRC)printer.c -o $(BUILD)printer.o
 	gcc $(CFLAGS) -D$(mode) -c $(SRC)kernel.c -o $(BUILD)kernel.o
 
 compile_asm: ccompile
-	# touch $(btldr)
-	# rm $(btldr) 
-
 	nasm -f elf32 $(SRC)boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.o
-	# nasm -f elf $(SRC)*.asm -F dwarf -g -d$(mode) -o $(BUILD)asm.o
 
 link: compile_asm
-	# link compiled kernel with bootloader and make it a binary
-	# ld -m elf_i386 -o $(BUILD)kernel.elf -T ld_script $(wildcard $(BUILD)*.o)
-	ld -m elf_i386 -o $(BUILD)kernel.elf -T ld_script $(BUILD)boot.o $(BUILD)kernel.o $(BUILD)printer.o $(BUILD)stdlib.o
-	# ld -m elf_i386 -o $(BUILD)kernel.elf -T ld_script ./build/boot.o ./build/kernel.o
+	ld -m elf_i386 -o $(BUILD)kernel.elf -T ld_script $(BUILD)boot.o $(BUILD)kernel.o $(BUILD)printer.o $(BUILD)stdlib.o $(BUILD)alloc.o $(BUILD)trampolines.o
 	objcopy -g -I elf32-i386 -O binary $(BUILD)kernel.elf $(BUILD)kernel.bin
 
 	dd if=/dev/zero of=$(BUILD)boot.img bs=1024 count=1440

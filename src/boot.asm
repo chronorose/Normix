@@ -87,6 +87,20 @@ gdt_descriptor:
     dw gdt_end - gdt_start - 1
     dd gdt_start
 
+global idt_load
+idt_load:
+    mov eax, [esp + 4]
+    lidt [eax]
+    ret
+global inter
+inter:
+    int 0x20
+    ret
+global _sti
+_sti:
+    sti
+    ret
+
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
 times  510 - ($-$$) db 0

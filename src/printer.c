@@ -29,7 +29,7 @@ void printer_init(void) {
 }
 
 void scroll(void) {
-    memmove((void*)BUFFER, (void*)((hword_t*)BUFFER + NCOLS), NCOLS * (NROWS - 1) * 2);
+    memmove((void*)BUFFER, (void*)((u16*)BUFFER + NCOLS), NCOLS * (NROWS - 1) * 2);
     memset(XY_TO_ADDR(0, NROWS - 1), 0, NCOLS * 2);
 }
 
@@ -73,7 +73,7 @@ void print(char *fmt, ...) {
                     case 'd':
                         printi(va_arg(ap, int), 10);
                         break;
-                    case 'h':
+                    case 'x':
                         printi(va_arg(ap, int), 16);
                         break;
                     case 's':

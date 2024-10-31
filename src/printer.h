@@ -1,16 +1,15 @@
 #pragma once
 #include "stdlib.h"
+#include "types.h"
 
 #define NROWS 25
 #define NCOLS 80
 #define BUFFER (0xb8000)
-#define XY_TO_ADDR(x,y) ((hword_t*)BUFFER + ((y) * 80 + (x)))
+#define XY_TO_ADDR(x,y) ((u16*)BUFFER + ((y) * 80 + (x)))
 #define DEF_FRGRND (WHITE)
 #define DEF_BCKGRND (BLACK)
 
 #define SYMBOL(ch,b,f) ((b << 12) | (f << 8) | (ch))
-
-typedef unsigned short int hword_t;
 
 typedef enum {
     BLACK = 0x0,
