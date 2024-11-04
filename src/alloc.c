@@ -36,6 +36,3 @@ byte_t *kernel_realloc(void *ptr, u32 size) {
     memmove(new_addr, ptr, size);
     return new_addr;
 }
-void kernel_free() {
-    alloc_cntxt.current = HEAP_BEGIN;
-}

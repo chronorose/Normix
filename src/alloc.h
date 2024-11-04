@@ -9,4 +9,3 @@ void alloc_init();
 byte_t *kernel_malloc(u32 size);
 byte_t *kernel_calloc(u32 nmemb, u32 size);
 byte_t *kernel_realloc(void *ptr, u32 size);
-void kernel_free();

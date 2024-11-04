@@ -79,6 +79,10 @@ void print(char *fmt, ...) {
                     case 's':
                         vga_print_string(va_arg(ap, char*), &printer.x, &printer.y);
                         break;
+                    case 'c':
+                        vga_print_char(va_arg(ap, char), printer.x, printer.y);
+                        advance(&printer.x, &printer.y);
+                        break;
                 }
                 break;
             case '\n':
