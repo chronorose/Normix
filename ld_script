@@ -1,0 +1,23 @@
+SECTIONS
+{
+    ENTRY(kernel_entry)
+    .btext 0xf800 : AT(0x7c00) {
+        build/boot.o(.text)
+    }
+    .ktext 0xfa00 : AT(0x7e00) {
+        /*./build/kernel.o(.text)
+        ./build/kernel.o(.data)
+        ./build/kernel.o(.rodata)
+        ./build/kernel.o(.bss) */
+
+        *(.text)
+        *(.data)
+        *(.rodata)
+        *(.bss)
+    }
+    /DISCARD/ : {
+        *(.eh_frame)
+        *(.note.gnu.property)
+        *(.comment)
+    }
+}

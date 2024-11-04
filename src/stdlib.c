@@ -1,21 +1,25 @@
 #include "stdlib.h"
 
-void kmemmove(void* dest, const void* src, int count) {
-    char* d = dest;
-    const char* s = src;
-    while (count) {
-        *d++ = *s++;
-        count--;
-    }
+void memset(void *dst, int c, int n) {
+  while (n--)
+    *((byte_t *)dst++) = c;
 }
-
-void kmemset(void* s, int c, unsigned int n) {
-    char* ch = s;
-    for (int i = 0; i < n; i++) {
-        *ch++ = c;
+void *memmove(void *dst, void *src, int n) {
+  if (!dst || !src) {
+    return (void *)0;
+  }
+  char *cdst = (byte_t *)dst;
+  char *csrc = (byte_t *)src;
+  if (dst <= src) {
+    while (n--) {
+      *cdst++ = *csrc++;
     }
-}
-
-int max(int a1, int a2) {
-    return a1 > a2 ? a1 : a2;
+  } else {
+    cdst += n - 1;
+    csrc += n - 1;
+    while (n--) {
+      *cdst-- = *csrc--;
+    }
+  }
+  return dst;
 }

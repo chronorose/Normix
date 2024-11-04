@@ -1,17 +1,14 @@
-#ifndef __NORMIX_STDLIB__
-#define __NORMIX_STDLIB__
+#pragma once
+#include "types.h"
 
-#define SWAP(x, y, T) do { T temp = x; x = y; y = temp; } while(0);
+#define MAX(x, y) ((x) < (y) ? (y) : (x))
 
-extern float sqrt(float arg);
-extern float cos(float arg);
-extern float sin(float arg);
+typedef byte_t *va_list;
+#define va_start(ap, parmN) (ap = (byte_t *)(&(parmN)) + sizeof(parmN))
+#define va_arg(ap, T)                                                          \
+  (ap += MAX(sizeof(u32), sizeof(T)),                                          \
+   *((T *)(ap - MAX(sizeof(u32), sizeof(T)))))
+#define va_end(ap) ap = (void *)0
 
-#define PI 3.14159265358979323846
-#define PI_2 1.57079632679489661923
-
-void kmemmove(void* dest, const void* src, int count);
-int max(int a1, int a2);
-void kmemset(void* s, int c, unsigned int n);
-
-#endif
+void memset(void *dst, int c, int n);
+void *memmove(void *dst, void *src, int n);
