@@ -1,4 +1,5 @@
 #include "alloc.h"
+#include "pic.h"
 #include "printer.h"
 #include "trampolines.h"
 
@@ -7,10 +8,10 @@ extern void inter();
 extern void _sti();
 
 void kmain(void) {
-  printer_init();
-  alloc_init();
-  idt_setup();
-  print("hello");
-  for (;;)
-    ;
+    printer_init();
+    alloc_init();
+    idt_setup();
+    pic_init();
+    _sti();
+    for (;;) ;
 }
