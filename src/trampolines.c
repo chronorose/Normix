@@ -330,7 +330,7 @@ static void *trampolines[] = {
     trampoline_0xf4, trampoline_0xf5, trampoline_0xf6, trampoline_0xf7,
     trampoline_0xf8, trampoline_0xf9, trampoline_0xfa, trampoline_0xfb,
     trampoline_0xfc, trampoline_0xfd, trampoline_0xfe, trampoline_0xff};
-extern void idt_load(void *);
+extern void lidt_load(void *);
 void idt_setup() {
   u32 idt_sz = sizeof(trampolines) / sizeof(trampolines[0]);
   gate_descriptor_t *idt =
@@ -355,5 +355,5 @@ void idt_setup() {
   }
   idt_descriptor_t idtd = {.idt_sz = idt_sz * sizeof(gate_descriptor_t) - 1,
                            .idt_addr = (u32)idt};
-  idt_load(&idtd);
+  lidt_load(&idtd);
 }
