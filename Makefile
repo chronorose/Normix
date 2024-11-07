@@ -27,12 +27,13 @@ ccompile:
 	gcc $(CFLAGS) -D$(mode) -c $(wildcard $(SRC)*.c)
 	mv *.o $(BUILD)
 
+# compile_asm: ccompile
 compile_asm: ccompile
 	touch $(btldr)
 	rm $(btldr) 
 
 	nasm -f elf boot/boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
-	nasm -f elf $(SRC)*.asm -F dwarf -g -d$(mode) -o $(BUILD)asm.o
+	nasm -f elf $(SRC)/float_ops.asm -F dwarf -g -d$(mode) -o $(BUILD)float_ops.o
 
 link: compile_asm
 	# link compiled kernel with bootloader and make it a binary

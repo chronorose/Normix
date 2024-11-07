@@ -1,7 +1,7 @@
 #include "alloc.h"
 #include "pic.h"
 #include "printer.h"
-#include "trampolines.h"
+#include "interrupts.h"
 
 extern printer_t printer;
 extern void inter();
@@ -12,6 +12,7 @@ void kmain(void) {
     alloc_init();
     idt_setup();
     pic_init();
-    _sti();
+    // inter();
+    // _sti();
     for (;;) ;
 }

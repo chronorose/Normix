@@ -1,4 +1,4 @@
-#include "trampolines.h"
+#include "interrupts.h"
 
 #include "alloc.h"
 #include "printer.h"
