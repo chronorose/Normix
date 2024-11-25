@@ -13,6 +13,6 @@ void kmain(void) {
     idt_setup();
     pic_init();
     // inter();
-    // _sti();
+    _sti();
     for (;;) ;
 }

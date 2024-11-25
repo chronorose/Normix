@@ -27,12 +27,12 @@ void pic_init(void) {
 #define ICWS_N 4
     byte_t icws[][ICWS_N] = {
         {icw1,
-         0x20,       // icw2_master
-         0b00000100, // icw3_master
+         MASTER_MAP_START, // icw2_master
+         0b00000100,       // icw3_master
          icw4},
         {icw1,
-         0x28, // icw2_slave
-         0x2,  // icw3_slave
+         SLAVE_MAP_START, // icw2_slave
+         0x2,             // icw3_slave
          icw4}};
 
     for (int port = MASTER_COMMAND, i = 0; port <= SLAVE_COMMAND; port += (SLAVE_COMMAND - MASTER_COMMAND), i++) {
@@ -66,7 +66,7 @@ void pic_unmask(byte_t irq) {
 }
 
 void pic_unmask_all(void) {
-    pic_send_byte(MASTER_DATA, inb(MASTER_DATA) & 0xFF);
+    pic_send_byte(MASTER_DATA, 0);
 }
 
 void pic_mask(byte_t irq) {
