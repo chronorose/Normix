@@ -3,6 +3,8 @@
 #include "alloc.h"
 #include "printer.h"
 
+extern void collect_ctx();
+
 void kernel_panic(char *msg, int vector) {
     print(msg, vector);
     for (;;)
@@ -11,6 +13,18 @@ void kernel_panic(char *msg, int vector) {
 
 static void panic_handler(int vector) {
     kernel_panic("unhandled interrupt %x", vector);
+}
+
+void timer_interrupt(ctx_t *ctx) {
+    kernel_panic("Hello from timer_interrupt", ctx->vector);
+}
+
+void interrupt_handler(ctx_t *ctx) {
+    switch (ctx->vector) {
+        case 0x20:
+            timer_interrupt(ctx);
+            break;
+    }
 }
 
 static void trampoline_0x00() { panic_handler(0x00); }
@@ -77,7 +91,9 @@ static void trampoline_0x1e() { panic_handler(0x1e); }
 
 static void trampoline_0x1f() { panic_handler(0x1f); }
 
-static void trampoline_0x20() { panic_handler(0x20); }
+extern void trampoline_0x20();
+
+// static void trampoline_0x20() { panic_handler(0x20); }
 
 static void trampoline_0x21() { panic_handler(0x21); }
 
