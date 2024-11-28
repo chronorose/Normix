@@ -4,6 +4,7 @@
 #include "printer.h"
 
 extern void collect_ctx();
+extern u32 get_eflags();
 
 void kernel_panic(char *msg, int vector) {
     print(msg, vector);
@@ -16,15 +17,18 @@ static void panic_handler(int vector) {
 }
 
 void timer_interrupt(ctx_t *ctx) {
-    kernel_panic("Hello from timer_interrupt", ctx->vector);
+    print("Hello from timer_interrupt %x\n", ctx->vector);
 }
 
 void interrupt_handler(ctx_t *ctx) {
-    switch (ctx->vector) {
-        case 0x20:
-            timer_interrupt(ctx);
-            break;
-    }
+    ctx_print(ctx);
+    for (;;)
+        ;
+    // switch (ctx->vector) {
+    //     case 0x20:
+    //         timer_interrupt(ctx);
+    //         break;
+    // }
 }
 
 static void trampoline_0x00() { panic_handler(0x00); }
@@ -93,8 +97,6 @@ static void trampoline_0x1f() { panic_handler(0x1f); }
 
 extern void trampoline_0x20();
 
-// static void trampoline_0x20() { panic_handler(0x20); }
-
 static void trampoline_0x21() { panic_handler(0x21); }
 
 static void trampoline_0x22() { panic_handler(0x22); }
@@ -113,7 +115,7 @@ static void trampoline_0x28() { panic_handler(0x28); }
 
 static void trampoline_0x29() { panic_handler(0x29); }
 
-static void trampoline_0x2a() { panic_handler(0x2a); }
+extern void trampoline_0x2a();
 
 static void trampoline_0x2b() { panic_handler(0x2b); }
 
@@ -634,4 +636,9 @@ void idt_setup() {
     idt_descriptor_t idtd = {.idt_sz = idt_sz * sizeof(gate_descriptor_t) - 1,
                              .idt_addr = (u32) idt};
     lidt_load(&idtd);
+}
+
+void ctx_print(ctx_t *ctx) {
+    char *msg = "Kernel panic: unhandled interrupt %x, interrupted process context:\neax = %x, ecx = %x, edx = %x, ebx = %x, esp = %x, ebp = %x, esi = %x, edi = %x, ds = %x, es = %x, fs = %x, gs = %x, cs = %x, ss = %x, eip = %x\neflags (interrupted) = %x eflags (current) = %x, error code = %x";
+    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->ss_opt, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
 }

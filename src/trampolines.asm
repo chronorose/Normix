@@ -1,10 +1,18 @@
 global collect_ctx
 global trampoline_0x20
+global trampoline_0x2a
+global get_eflags
+global experiment
 extern interrupt_handler
 
 trampoline_0x20:
     push 0x00
     push 0x20
+    jmp collect_ctx
+
+trampoline_0x2a:
+    push 0xff
+    push 0x2a
     jmp collect_ctx
 
 collect_ctx:
@@ -14,4 +22,22 @@ collect_ctx:
     push gs
     pusha
     push esp
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
     call interrupt_handler
+
+experiment:
+    mov eax, 1
+    mov ecx, 2
+    mov edx, 3
+    mov ebx, 4
+    mov esi, 5
+    mov edi, 6
+    mov ebp, 7
+    int 42
+
+get_eflags:
+    pushfd 
+    pop eax
+    ret

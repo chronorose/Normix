@@ -57,3 +57,4 @@ typedef struct {
 
 void kernel_panic(char *msg, int vector);
 void idt_setup();
+void ctx_print(ctx_t *ctx);
