@@ -12,9 +12,9 @@
 #define PIC_EOI 0x20
 
 typedef enum {
-    IRQ_TIMER = 0x1,
-    IRQ_KBD = 0x2,
-    IRQ_SLAVE = 0x4,
+    IRQ_TIMER = 0x0,
+    IRQ_KBD = 0x1,
+    IRQ_SLAVE = 0x2,
 } IRQ;
 
 void pic_init(void);

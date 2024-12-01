@@ -13,8 +13,9 @@ void kmain(void) {
     alloc_init();
     idt_setup();
     pic_init();
-    experiment();
-    // _sti();
+    // experiment();
+    // print("123");
+    _sti();
     for (;;)
-        ;
+        print("*");
 }

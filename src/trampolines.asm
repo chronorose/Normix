@@ -11,7 +11,7 @@ trampoline_0x20:
     jmp collect_ctx
 
 trampoline_0x2a:
-    push 0xff
+    push 0x00
     push 0x2a
     jmp collect_ctx
 
@@ -26,6 +26,9 @@ collect_ctx:
     mov ds, ax
     mov es, ax
     call interrupt_handler
+    popa
+    add esp, 28
+    iretd
 
 experiment:
     mov eax, 1

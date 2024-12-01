@@ -1,10 +1,14 @@
 #include "interrupts.h"
 
 #include "alloc.h"
+#include "pic.h"
 #include "printer.h"
 
 extern void collect_ctx();
 extern u32 get_eflags();
+extern void _sti();
+
+int glob = 0;
 
 void kernel_panic(char *msg, int vector) {
     print(msg, vector);
@@ -17,18 +21,18 @@ static void panic_handler(int vector) {
 }
 
 void timer_interrupt(ctx_t *ctx) {
-    print("Hello from timer_interrupt %x\n", ctx->vector);
+    // print("Hello from timer_interrupt %x\n", ctx->vector);
+    print("%d ", glob++);
+    _sti();
+    pic_send_eoi(ctx->vector);
 }
 
 void interrupt_handler(ctx_t *ctx) {
-    ctx_print(ctx);
-    for (;;)
-        ;
-    // switch (ctx->vector) {
-    //     case 0x20:
-    //         timer_interrupt(ctx);
-    //         break;
-    // }
+    switch (ctx->vector) {
+        case 0x20:
+            timer_interrupt(ctx);
+            break;
+    }
 }
 
 static void trampoline_0x00() { panic_handler(0x00); }
@@ -626,7 +630,7 @@ void idt_setup() {
         gd.segselector = 0x8;
         gd.nargs = 0x0;
         gd.unused0 = 0x0;
-        gd.gate_type = INTERRUPT_GATE;
+        gd.gate_type = (i < 0x20) ? TRAP_GATE : INTERRUPT_GATE;
         gd.unused1 = 0x0;
         gd.dpl = 0x0;
         gd.existance_bit = 1;
