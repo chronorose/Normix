@@ -62,7 +62,7 @@ void pic_send_eoi(byte_t irq) {
 }
 
 void pic_unmask(byte_t irq) {
-    pic_send_byte(MASTER_DATA, inb(MASTER_DATA) & ~irq);
+    pic_send_byte(MASTER_DATA, inb(MASTER_DATA) & ~(1 << irq));
 }
 
 void pic_unmask_all(void) {
