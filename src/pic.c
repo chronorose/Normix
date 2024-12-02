@@ -1,4 +1,5 @@
 #include "pic.h"
+#include "printer.h"
 
 extern byte_t _inb(u16 port);
 extern void _outb(u16 port, byte_t data);

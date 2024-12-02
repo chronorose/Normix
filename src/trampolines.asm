@@ -26,8 +26,9 @@ collect_ctx:
     mov ds, ax
     mov es, ax
     call interrupt_handler
+    add esp, 4
     popa
-    add esp, 28
+    add esp, 24
     iretd
 
 experiment:
@@ -39,6 +40,7 @@ experiment:
     mov edi, 6
     mov ebp, 7
     int 42
+    ret
 
 get_eflags:
     pushfd 

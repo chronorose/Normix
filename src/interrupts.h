@@ -25,8 +25,6 @@ typedef struct {
     u32 idt_addr;
 } idt_descriptor_t;
 
-#pragma pack(pop)
-
 typedef struct {
     u32 edi, esi, ebp, esp, ebx, edx, ecx, eax;
 
@@ -54,6 +52,9 @@ typedef struct {
     u16 ss_opt;
     u16 ss_opt_pd;
 } ctx_t;
+
+#pragma pack(pop)
+
 
 void kernel_panic(char *msg, int vector);
 void idt_setup();

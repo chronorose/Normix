@@ -9,6 +9,7 @@ extern u32 get_eflags();
 extern void _sti();
 
 int glob = 0;
+int glob1 = 0;
 
 void kernel_panic(char *msg, int vector) {
     print(msg, vector);
@@ -20,9 +21,10 @@ static void panic_handler(int vector) {
     kernel_panic("unhandled interrupt %x", vector);
 }
 
-void timer_interrupt(ctx_t *ctx) {
-    // print("Hello from timer_interrupt %x\n", ctx->vector);
-    print("%d ", glob++);
+void timer_handler(ctx_t *ctx) {
+    print("0x20: %d\n", glob++);
+    for (int i = 0; i < 10000; i++) {
+    }
     _sti();
     pic_send_eoi(ctx->vector);
 }
@@ -30,7 +32,13 @@ void timer_interrupt(ctx_t *ctx) {
 void interrupt_handler(ctx_t *ctx) {
     switch (ctx->vector) {
         case 0x20:
-            timer_interrupt(ctx);
+            timer_handler(ctx);
+            break;
+        case 0x2a:
+            print("0x2a: %d\n", glob1++);
+            for (int i = 0; i < 1000000; i++) {
+            }
+            _sti();
             break;
     }
 }
@@ -644,5 +652,5 @@ void idt_setup() {
 
 void ctx_print(ctx_t *ctx) {
     char *msg = "Kernel panic: unhandled interrupt %x, interrupted process context:\neax = %x, ecx = %x, edx = %x, ebx = %x, esp = %x, ebp = %x, esi = %x, edi = %x, ds = %x, es = %x, fs = %x, gs = %x, cs = %x, ss = %x, eip = %x\neflags (interrupted) = %x eflags (current) = %x, error code = %x";
-    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->ss_opt, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
+    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp_opt, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->ss_opt, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
 }

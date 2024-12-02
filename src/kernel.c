@@ -8,14 +8,20 @@ extern void inter();
 extern void _sti();
 extern void experiment();
 
+void another_task() {
+    for (int i = 0; i < 100000; i++) {
+    }
+    print("another task\n");
+}
+
 void kmain(void) {
     printer_init();
     alloc_init();
     idt_setup();
     pic_init();
-    // experiment();
-    // print("123");
     _sti();
-    for (;;)
-        print("*");
+    for (;;) {
+        another_task();
+        experiment();
+    }
 }
