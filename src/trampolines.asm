@@ -28,7 +28,11 @@ collect_ctx:
     call interrupt_handler
     add esp, 4
     popa
-    add esp, 24
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    add esp, 8
     iretd
 
 experiment:

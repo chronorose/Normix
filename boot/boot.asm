@@ -109,6 +109,11 @@ _sti:
     sti
     ret
 
+global _cli
+_cli:
+    cli
+    ret
+
 global _inb
 _inb:
     mov dx, word [esp + 4]

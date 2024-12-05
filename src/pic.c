@@ -1,16 +1,11 @@
 #include "pic.h"
-#include "printer.h"
 
 extern byte_t _inb(u16 port);
 extern void _outb(u16 port, byte_t data);
 
-byte_t inb(u16 port) {
-    return _inb(port);
-}
+byte_t inb(u16 port) { return _inb(port); }
 
-void outb(u16 port, byte_t data) {
-    _outb(port, data);
-}
+void outb(u16 port, byte_t data) { _outb(port, data); }
 
 /**
  * pic_send_byte:
@@ -26,17 +21,17 @@ void pic_init(void) {
     byte_t icw4 = 0b00000001;
 
 #define ICWS_N 4
-    byte_t icws[][ICWS_N] = {
-        {icw1,
-         MASTER_MAP_START, // icw2_master
-         0b00000100,       // icw3_master
-         icw4},
-        {icw1,
-         SLAVE_MAP_START, // icw2_slave
-         0x2,             // icw3_slave
-         icw4}};
+    byte_t icws[][ICWS_N] = {{icw1,
+                              MASTER_MAP_START, // icw2_master
+                              0b00000100,       // icw3_master
+                              icw4},
+                             {icw1,
+                              SLAVE_MAP_START, // icw2_slave
+                              0x2,             // icw3_slave
+                              icw4}};
 
-    for (int port = MASTER_COMMAND, i = 0; port <= SLAVE_COMMAND; port += (SLAVE_COMMAND - MASTER_COMMAND), i++) {
+    for (int port = MASTER_COMMAND, i = 0; port <= SLAVE_COMMAND;
+         port += (SLAVE_COMMAND - MASTER_COMMAND), i++) {
         pic_send_byte(port, icws[i][0]);
         for (int j = 1; j < ICWS_N; j++) {
             pic_send_byte(port + 1, icws[i][j]);
@@ -47,8 +42,8 @@ void pic_init(void) {
     // pic_unmask(IRQ_KBD);
 
     /**
-     * Drivers setup
-     */
+   * Drivers setup
+   */
     // kbd_init();
 }
 
@@ -66,14 +61,10 @@ void pic_unmask(byte_t irq) {
     pic_send_byte(MASTER_DATA, inb(MASTER_DATA) & ~(1 << irq));
 }
 
-void pic_unmask_all(void) {
-    pic_send_byte(MASTER_DATA, 0);
-}
+void pic_unmask_all(void) { pic_send_byte(MASTER_DATA, 0); }
 
 void pic_mask(byte_t irq) {
     pic_send_byte(MASTER_DATA, inb(MASTER_DATA) | (1 << irq));
 }
 
-void pic_mask_all(void) {
-    pic_send_byte(MASTER_DATA, inb(MASTER_DATA) | 0xFF);
-}
+void pic_mask_all(void) { pic_send_byte(MASTER_DATA, inb(MASTER_DATA) | 0xFF); }

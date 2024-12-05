@@ -6,6 +6,7 @@
 extern printer_t printer;
 extern void inter();
 extern void _sti();
+extern void _cli();
 extern void experiment();
 
 void another_task() {

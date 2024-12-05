@@ -47,10 +47,6 @@ typedef struct {
     u16 cs;
     u16 cs_pd;
     u32 eflags;
-
-    u32 esp_opt;
-    u16 ss_opt;
-    u16 ss_opt_pd;
 } ctx_t;
 
 #pragma pack(pop)

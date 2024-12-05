@@ -7,6 +7,7 @@
 extern void collect_ctx();
 extern u32 get_eflags();
 extern void _sti();
+extern void _cli();
 
 int glob = 0;
 int glob1 = 0;
@@ -40,6 +41,8 @@ void interrupt_handler(ctx_t *ctx) {
             }
             _sti();
             break;
+        default:
+            panic_handler(ctx->vector);
     }
 }
 
@@ -651,6 +654,6 @@ void idt_setup() {
 }
 
 void ctx_print(ctx_t *ctx) {
-    char *msg = "Kernel panic: unhandled interrupt %x, interrupted process context:\neax = %x, ecx = %x, edx = %x, ebx = %x, esp = %x, ebp = %x, esi = %x, edi = %x, ds = %x, es = %x, fs = %x, gs = %x, cs = %x, ss = %x, eip = %x\neflags (interrupted) = %x eflags (current) = %x, error code = %x";
-    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp_opt, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->ss_opt, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
+    char *msg = "Kernel panic: unhandled interrupt %x, interrupted process context:\neax = %x, ecx = %x, edx = %x, ebx = %x, esp = %x, ebp = %x, esi = %x, edi = %x, ds = %x, es = %x, fs = %x, gs = %x, cs = %x, eip = %x\neflags (interrupted) = %x eflags (current) = %x, error code = %x";
+    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
 }
