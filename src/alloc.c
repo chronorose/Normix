@@ -1,4 +1,5 @@
 #include "alloc.h"
+
 #include "stdlib.h"
 
 typedef struct {
@@ -19,6 +20,7 @@ byte_t *kernel_malloc(u32 size) {
     alloc_cntxt.current += size;
     return addr;
 }
+
 byte_t *kernel_calloc(u32 nmemb, u32 size) {
     byte_t *addr = kernel_malloc(nmemb * size);
     if (!addr) {

@@ -1,12 +1,25 @@
 #pragma once
 #include "types.h"
 
+#define PUSH_BYTE_INSTRUCTION 0x6A
+#define JUMP_RELATIVE_4BYTES_INSTRUCTION 0xE9
+#define IDT_SIZE 256
+
 typedef enum {
     INTERRUPT_GATE = 0xE,
     TRAP_GATE = 0xF,
 } GATE_TYPE;
 
 #pragma pack(push, 1)
+
+typedef struct {
+    unsigned char push;
+    unsigned char error_code;
+    unsigned char push2;
+    unsigned char ivector;
+    unsigned char j;
+    int handler_addr;
+} trampoline;
 
 typedef struct {
     u16 offset_low;
