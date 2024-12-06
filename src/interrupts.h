@@ -14,7 +14,14 @@ typedef enum {
 
 typedef struct {
     unsigned char push;
-    unsigned char error_code;
+    unsigned char ivector;
+    unsigned char j;
+    int handler_addr;
+} trampoline_no_err;
+
+typedef struct {
+    unsigned char push;
+    unsigned char err_code;
     unsigned char push2;
     unsigned char ivector;
     unsigned char j;

@@ -18,20 +18,45 @@ void kernel_panic(char *msg, int vector) {
         ;
 }
 
-// at some point in the future there will be switch with all the stuff.
-unsigned char getErrorCode(unsigned char ivector) {
-    return 0;
+trampoline_no_err *tramp_gen_without_err_code(unsigned char ivector) {
+    trampoline_no_err *tr = (trampoline_no_err *) kernel_malloc(sizeof(trampoline_no_err));
+    tr->push = PUSH_BYTE_INSTRUCTION;
+    tr->ivector = ivector;
+    tr->j = JUMP_RELATIVE_4BYTES_INSTRUCTION;
+    tr->handler_addr = -((unsigned int) tr - (unsigned int) collect_ctx) - sizeof(trampoline_no_err);
+    return tr;
 }
 
 trampoline *tramp_gen(unsigned char ivector) {
     trampoline *tr = (trampoline *) kernel_malloc(sizeof(trampoline));
     tr->push = PUSH_BYTE_INSTRUCTION;
-    tr->error_code = getErrorCode(ivector);
+    tr->err_code = 0x0;
     tr->push2 = PUSH_BYTE_INSTRUCTION;
     tr->ivector = ivector;
     tr->j = JUMP_RELATIVE_4BYTES_INSTRUCTION;
     tr->handler_addr = -((unsigned int) tr - (unsigned int) collect_ctx) - sizeof(trampoline);
     return tr;
+}
+
+byte_t *generate_trampoline(unsigned char ivector) {
+    byte_t *ret = 0x0;
+    switch (ivector) {
+        case 0xa:
+        case 0xb:
+        case 0xC:
+        case 0xd:
+        case 0xe:
+        case 0x11:
+        case 0x15:
+        case 0x1D:
+        case 0x1E:
+            ret = (byte_t *) tramp_gen_without_err_code(ivector);
+            break;
+        default:
+            ret = (byte_t *) tramp_gen(ivector);
+            break;
+    }
+    return ret;
 }
 
 static void panic_handler(int vector) {
@@ -76,7 +101,7 @@ void idt_setup() {
 
     for (int i = 0; i < idt_sz; i++) {
         gate_descriptor_t gd;
-        byte_t *handler = (byte_t *) tramp_gen(i);
+        byte_t *handler = (byte_t *) generate_trampoline(i);
         gd.offset_low = (u16) handler;
         gd.segselector = 0x8;
         gd.nargs = 0x0;
