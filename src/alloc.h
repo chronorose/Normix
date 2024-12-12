@@ -2,8 +2,8 @@
 
 #include "types.h"
 
-#define HEAP_BEGIN ((byte_t *)0x100000)
-#define HEAP_END ((byte_t *)0x400000)
+#define HEAP_BEGIN ((byte_t *) 0x480000)
+#define HEAP_END ((byte_t *) 0x880000)
 
 void alloc_init();
 byte_t *kernel_malloc(u32 size);
