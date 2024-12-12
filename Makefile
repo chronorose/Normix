@@ -34,6 +34,7 @@ compile_asm: ccompile
 
 	nasm -f elf $(SRC)/boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
 	nasm -f elf $(SRC)trampolines.asm -F dwarf -g -d$(mode) -o $(BUILD)trampolines.o
+	nasm -f elf $(SRC)utils.asm -F dwarf -g -d$(mode) -o $(BUILD)utils.o
 
 link: compile_asm
 	# link compiled kernel with bootloader and make it a binary
