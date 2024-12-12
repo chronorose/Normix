@@ -32,7 +32,7 @@ compile_asm: ccompile
 	touch $(btldr)
 	rm $(btldr) 
 
-	nasm -f elf boot/boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
+	nasm -f elf $(SRC)/boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
 	nasm -f elf $(SRC)trampolines.asm -F dwarf -g -d$(mode) -o $(BUILD)trampolines.o
 
 link: compile_asm

@@ -5,16 +5,6 @@ global get_eflags
 global experiment
 extern interrupt_handler
 
-trampoline_0x20:
-    push 0x00
-    push 0x20
-    jmp collect_ctx
-
-trampoline_0x2a:
-    push 0x00
-    push 0x2a
-    jmp collect_ctx
-
 collect_ctx:
     push ds
     push es

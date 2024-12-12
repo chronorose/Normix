@@ -79,10 +79,9 @@ mov eax, cr4
 or ax, 3 << 9
 mov cr4, eax
 
-jmp CODE_SEG:trampoline
-
+jmp CODE_SEG:trampolin ;+ 0xf800
 [BITS 32]
-trampoline:
+trampolin:
     mov eax, DATA_SEG 
     mov ds, ax
     mov es, ax
