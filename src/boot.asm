@@ -1,4 +1,16 @@
 [BITS 16]
+jmp _start
+
+gdt_start:
+    dq 0x0
+gdt_code:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
+gdt_data:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
+gdt_end:
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
 
 global _start
 extern kmain
@@ -68,7 +80,8 @@ init_video:
 ;; sacred code of omnissiah has ended. you may touch further
 xor ax, ax
 mov ds, ax
-lgdt [gdt_descriptor]
+lgdt [0xf81a]
+;lgdt [gdt_descriptor]
 
 mov eax, cr4
 or ax, 3 << 9 ; sse flags
@@ -79,7 +92,8 @@ or eax, 3
 ;and ax, 0xFFFB ; enable fpu
 mov cr0, eax
 
-jmp CODE_SEG:trampolin; we will have to substract here or some shit idk.
+jmp CODE_SEG:0xf895
+;jmp CODE_SEG:trampolin
 
 [BITS 32]
 
@@ -93,30 +107,34 @@ trampolin:
     mov esp, 0xf800
 ; somewhere here we should start initializing our mr. paging.
 
-;mov ecx, 0 ; pages index.
-;mov ebx, tables ; tables address.
-;mov esi, 1024
-;mov edx, 0
-;fill_pd:
-;  mov eax, ebx 
-;  or eax, 6
-;  mov [directory + edx * 4], eax
-;  inc edx
-;  mov edi, 1024 
-;fill_pt:
-;  mov eax, ecx 
-;  shl eax, 12
-;  or eax, 6
-;  mov [ebx], eax
-;  inc ecx
-;  add ebx, 4
-;  dec edi
-;  jnz fill_pt
-;  dec esi
-;  jnz fill_pd
-;
+mov ecx, 0 ; pages index.
+mov ebx, tables ; tables address.
+mov esi, 1024
+mov edx, 0
+fill_pd:
+  mov eax, ebx 
+  or eax, 7
+  mov [directory + edx * 4], eax
+  inc edx
+  mov edi, 1024 
+fill_pt:
+  mov eax, ecx 
+  shl eax, 12
+  or eax, 7
+  mov [ebx], eax
+  inc ecx
+  add ebx, 4
+  dec edi
+  jnz fill_pt
+  dec esi
+  jnz fill_pd
+
+;  mov edx, 0 ; number of directory we want to map our kernel into
+;relocate_first_table:
+
+
 ;  mov ebx, tables
-;  mov ecx, 16 
+;  mov ecx, 15 ; we turn off first 15 pages. 
 ;  mov edx, 0
 ;turn_off:
 ;  mov eax, edx
@@ -128,22 +146,17 @@ trampolin:
 ;  inc edx
 ;  dec ecx
 ;  jnz turn_off
-;
-;
-;
-;funny_things:
-;  mov eax, directory
-;  mov cr3, eax
-  ;mov eax, cr0
-  ;or eax, (1 << 31)
-  ;mov cr0, eax
-;
-;
-;afterwards:
-;    ; this adress will become incorrect.
-;    mov esp, 0xf800
 
-    call kmain
+
+
+funny_things:
+  mov eax, directory
+  mov cr3, eax
+  mov eax, cr0
+  or eax, (1 << 31)
+  mov cr0, eax
+
+  call kmain
 jmp $
 
 global lidt_load
@@ -183,17 +196,6 @@ _outb:
 
 directory equ 0x80000
 tables equ 0x82000
-
-gdt_start:
-    dq 0x0
-gdt_code:
-    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
-gdt_data:
-    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
-gdt_end:
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start

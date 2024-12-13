@@ -29,7 +29,6 @@ pt_entry *createPT(u32 index) {
 
 pd_entry *createPD() {
     pd_entry *pd = (pd_entry *) kernel_malloc_aligned(sizeof(void *) * PT_AMOUNT, ALIGNMENT);
-
     for (u32 i = 0; i < PT_AMOUNT; i++) {
         pd[i].present = 1;
         pd[i].rw = 1;

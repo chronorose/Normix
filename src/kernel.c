@@ -20,10 +20,10 @@ void another_task() {
 void kmain(void) {
     printer_init();
     alloc_init();
-    paging_setup();
-    /*int kek = *((int *) 0x8);*/
+    /*paging_setup();*/
     idt_setup();
     pic_init();
+    int kek = *((int *) 0x8);
     _sti();
     for (;;) {
         another_task();
