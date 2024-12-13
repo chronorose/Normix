@@ -12,7 +12,7 @@ gdt_data:
 gdt_end:
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd 0xf802
+    dd _gdt_start
 
 global _start
 extern kmain
@@ -78,8 +78,7 @@ init_video:
 
 xor ax, ax
 mov ds, ax
-lgdt [0xf81a]
-;lgdt [gdt_descriptor]
+lgdt [_gdt_descriptor]
 
 mov eax, cr4
 or ax, 3 << 9 ; sse flags
@@ -90,13 +89,12 @@ or eax, 3
 ;and ax, 0xFFFB ; enable fpu
 mov cr0, eax
 
-jmp CODE_SEG:0xf895
-;jmp CODE_SEG:trampolin
+jmp CODE_SEG:_trampoline
 ;; sacred code of omnissiah has ended. you may touch further
 
 [BITS 32]
 
-trampolin:
+trampoline:
     mov eax, DATA_SEG 
     mov ds, ax
     mov es, ax
@@ -128,10 +126,10 @@ fill_pt:
   jnz fill_pd
 
   mov ebx, tables
-  add ebx, 0x300000
+  add ebx, table_768_offset
   mov ecx, 15
   mov edi, 2048
-fill_shittable:
+fill_hhk:
   mov eax, ecx
   shl eax, 12
   or eax, 7
@@ -139,11 +137,12 @@ fill_shittable:
   inc ecx
   add ebx, 4
   dec edi
-  jnz fill_shittable
+  jnz fill_hhk
 
   mov ebx, tables
   mov ecx, 15 ; we turn off first 15 pages. 
   mov edx, 0
+
 turn_off:
   mov eax, edx
   shl eax, 12
@@ -203,10 +202,16 @@ _outb:
 
 
 directory equ 0x80000
-tables equ 0x82000
+tables equ 0x81000
+
+table_768_offset equ 0x300000
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
+
+_gdt_descriptor equ 0xf81a
+_trampoline equ 0xf895
+_gdt_start equ 0xf802
 
 ; generate zero bytes to size 510
 times  510 - ($ - $$) db 0
