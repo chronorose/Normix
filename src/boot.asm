@@ -70,14 +70,14 @@ xor ax, ax
 mov ds, ax
 lgdt [gdt_descriptor]
 
-mov eax, cr0
-or eax, 1 
-or eax, 3 
-and ax, 0xFFFB
-mov cr0, eax
 mov eax, cr4
-or ax, 3 << 9
+or ax, 3 << 9 ; sse flags
 mov cr4, eax
+
+mov eax, cr0
+or eax, 3 
+;and ax, 0xFFFB ; enable fpu
+mov cr0, eax
 
 jmp CODE_SEG:trampolin; we will have to substract here or some shit idk.
 
@@ -90,25 +90,60 @@ trampolin:
     mov fs, ax
     mov gs, ax
     mov ss, ax
+    mov esp, 0xf800
 ; somewhere here we should start initializing our mr. paging.
 
-;mov eax, 0
-;mov ebx, 0x0
+;mov ecx, 0 ; pages index.
+;mov ebx, tables ; tables address.
+;mov esi, 1024
+;mov edx, 0
+;fill_pd:
+;  mov eax, ebx 
+;  or eax, 6
+;  mov [directory + edx * 4], eax
+;  inc edx
+;  mov edi, 1024 
 ;fill_pt:
-;  mov edi, ebx 
-;  or edi, 3
-;  mov [table_address], edi
+;  mov eax, ecx 
+;  shl eax, 12
+;  or eax, 6
+;  mov [ebx], eax
+;  inc ecx
+;  add ebx, 4
+;  dec edi
+;  jnz fill_pt
+;  dec esi
+;  jnz fill_pd
+;
+;  mov ebx, tables
+;  mov ecx, 16 
+;  mov edx, 0
+;turn_off:
+;  mov eax, edx
+;  shl eax, 12
+;  or eax, 7
+;  xor eax, 1
+;  mov [ebx], eax
+;  add ebx, 4
+;  inc edx
+;  dec ecx
+;  jnz turn_off
+;
+;
+;
+;funny_things:
+;  mov eax, directory
+;  mov cr3, eax
+  ;mov eax, cr0
+  ;or eax, (1 << 31)
+  ;mov cr0, eax
 ;
 ;
 ;afterwards:
 ;    ; this adress will become incorrect.
 ;    mov esp, 0xf800
 
-
-
-
-  call kmain
-
+    call kmain
 jmp $
 
 global lidt_load
@@ -145,8 +180,9 @@ _outb:
     out dx, al
     ret
 
-table_address:
-  dd 0x80000
+
+directory equ 0x80000
+tables equ 0x82000
 
 gdt_start:
     dq 0x0
@@ -157,7 +193,7 @@ gdt_data:
 gdt_end:
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd gdt_start ;+ 0xf800
+    dd gdt_start
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start

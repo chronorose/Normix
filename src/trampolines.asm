@@ -7,6 +7,9 @@ extern interrupt_handler
 do_paging:
   mov eax, [esp + 4]  ; address of page directory
   mov cr3, eax   
+  mov eax, cr0
+  or eax, (1 << 31)
+  mov cr0, eax
   ret
 
 collect_ctx:

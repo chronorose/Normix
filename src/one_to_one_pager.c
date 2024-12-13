@@ -1,6 +1,7 @@
 #include "one_to_one_pager.h"
 
 #include "alloc.h"
+#include "printer.h"
 
 /*
  * this is for 1-1 page translation.
@@ -21,7 +22,7 @@ pt_entry *createPT(u32 index) {
         pt[i].present = 1;
         pt[i].rw = 1;
         pt[i].user_supervisor = 1;
-        pt[i].frame_address = (index * PAGES_AMOUNT + i) * PAGE;
+        pt[i].frame_address = ((index * PAGES_AMOUNT + i) * PAGE) >> 12;
     }
     return pt;
 }
@@ -35,7 +36,7 @@ pd_entry *createPD() {
         pd[i].user_supervisor = 1;
         pd[i].page_size = 0;
         pt_entry *pt = createPT(i);
-        pt[i].frame_address = ((u32) pt) >> 12; // have to check if it's gonna be alright.
+        pd[i].pt_address = ((u32) pt) >> 12; // have to check if it's gonna be alright.
     }
     return pd;
 }

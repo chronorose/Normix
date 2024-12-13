@@ -3,13 +3,13 @@ OUTPUT_ARCH(i386)
 ENTRY(_start)
 SECTIONS {
     . = 0xf800;
-    .boot : AT(0xf800)
+    .boot :
     {
         build/boot.out(.text)
     }
 
     . = 0xfa00;
-    .kernel : AT(0xfa00)
+    .kernel :
     {
         *(.text)
         *(.rodata)

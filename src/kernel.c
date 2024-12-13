@@ -21,6 +21,7 @@ void kmain(void) {
     printer_init();
     alloc_init();
     paging_setup();
+    /*int kek = *((int *) 0x8);*/
     idt_setup();
     pic_init();
     _sti();
