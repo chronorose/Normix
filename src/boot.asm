@@ -10,7 +10,7 @@ gdt_data:
 gdt_end:
 gdt_descriptor:
     dw gdt_end - gdt_start - 1
-    dd gdt_start
+    dd 0xf802
 
 global _start
 extern kmain
@@ -128,6 +128,20 @@ fill_pt:
   jnz fill_pt
   dec esi
   jnz fill_pd
+
+  mov ebx, tables
+  add ebx, 0x300000
+  mov ecx, 15
+  mov edi, 2048
+fill_shittable:
+  mov eax, ecx
+  shl eax, 12
+  or eax, 7
+  mov [ebx], eax
+  inc ecx
+  add ebx, 4
+  dec edi
+  jnz fill_shittable
 
 ;  mov edx, 0 ; number of directory we want to map our kernel into
 ;relocate_first_table:
