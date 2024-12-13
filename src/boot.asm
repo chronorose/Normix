@@ -1,4 +1,6 @@
 [BITS 16]
+;; this is the sacred code of omnissiah
+;; do not touch it under no circumstances
 jmp _start
 
 gdt_start:
@@ -22,9 +24,6 @@ cli
 cld
 
 mov sp, 0x7C00 
-
-;; this is the sacred code of omnissiah
-;; do not touch it under no circumstances
 
 read_cylinder:
     mov ax, 0xF80
@@ -77,7 +76,6 @@ init_video:
     int 0x10
 
 
-;; sacred code of omnissiah has ended. you may touch further
 xor ax, ax
 mov ds, ax
 lgdt [0xf81a]
@@ -94,6 +92,7 @@ mov cr0, eax
 
 jmp CODE_SEG:0xf895
 ;jmp CODE_SEG:trampolin
+;; sacred code of omnissiah has ended. you may touch further
 
 [BITS 32]
 
@@ -105,7 +104,6 @@ trampolin:
     mov gs, ax
     mov ss, ax
     mov esp, 0xf800
-; somewhere here we should start initializing our mr. paging.
 
 mov ecx, 0 ; pages index.
 mov ebx, tables ; tables address.
@@ -143,23 +141,19 @@ fill_shittable:
   dec edi
   jnz fill_shittable
 
-;  mov edx, 0 ; number of directory we want to map our kernel into
-;relocate_first_table:
-
-
-;  mov ebx, tables
-;  mov ecx, 15 ; we turn off first 15 pages. 
-;  mov edx, 0
-;turn_off:
-;  mov eax, edx
-;  shl eax, 12
-;  or eax, 7
-;  xor eax, 1
-;  mov [ebx], eax
-;  add ebx, 4
-;  inc edx
-;  dec ecx
-;  jnz turn_off
+  mov ebx, tables
+  mov ecx, 15 ; we turn off first 15 pages. 
+  mov edx, 0
+turn_off:
+  mov eax, edx
+  shl eax, 12
+  or eax, 7
+  xor eax, 1
+  mov [ebx], eax
+  add ebx, 4
+  inc edx
+  dec ecx
+  jnz turn_off
 
 
 

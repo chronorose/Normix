@@ -23,7 +23,7 @@ void kmain(void) {
     /*paging_setup();*/
     idt_setup();
     pic_init();
-    int kek = *((int *) 0x8);
+    /*int kek = *((int *) 0x8);*/
     _sti();
     for (;;) {
         another_task();
