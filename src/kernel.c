@@ -1,5 +1,6 @@
 #include "alloc.h"
 #include "interrupts.h"
+#include "one_to_one_pager.h"
 #include "pic.h"
 #include "printer.h"
 
@@ -19,6 +20,7 @@ void another_task() {
 void kmain(void) {
     printer_init();
     alloc_init();
+    paging_setup();
     idt_setup();
     pic_init();
     _sti();

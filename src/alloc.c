@@ -38,3 +38,8 @@ byte_t *kernel_realloc(void *ptr, u32 size) {
     memmove(new_addr, ptr, size);
     return new_addr;
 }
+
+byte_t *kernel_malloc_aligned(u32 size, int align) {
+    alloc_cntxt.current = (byte_t *) (((u32) alloc_cntxt.current - 1 + align) & (-align));
+    return kernel_malloc(size);
+}

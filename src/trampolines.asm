@@ -1,9 +1,13 @@
 global collect_ctx
-global trampoline_0x20
-global trampoline_0x2a
 global get_eflags
 global experiment
+global do_paging
 extern interrupt_handler
+
+do_paging:
+  mov eax, [esp + 4]  ; address of page directory
+  mov cr3, eax   
+  ret
 
 collect_ctx:
     push ds

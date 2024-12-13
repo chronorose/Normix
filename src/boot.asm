@@ -79,8 +79,10 @@ mov eax, cr4
 or ax, 3 << 9
 mov cr4, eax
 
-jmp CODE_SEG:trampolin ;+ 0xf800
+jmp CODE_SEG:trampolin; we will have to substract here or some shit idk.
+
 [BITS 32]
+
 trampolin:
     mov eax, DATA_SEG 
     mov ds, ax
@@ -88,8 +90,24 @@ trampolin:
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    mov esp, 0xf800
-    call kmain
+; somewhere here we should start initializing our mr. paging.
+
+;mov eax, 0
+;mov ebx, 0x0
+;fill_pt:
+;  mov edi, ebx 
+;  or edi, 3
+;  mov [table_address], edi
+;
+;
+;afterwards:
+;    ; this adress will become incorrect.
+;    mov esp, 0xf800
+
+
+
+
+  call kmain
 
 jmp $
 
@@ -126,6 +144,9 @@ _outb:
     mov dx, word [esp + 4]
     out dx, al
     ret
+
+table_address:
+  dd 0x80000
 
 gdt_start:
     dq 0x0

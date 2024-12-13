@@ -33,6 +33,7 @@ compile_asm: ccompile
 	rm $(btldr) 
 
 	nasm -f elf $(SRC)/boot.asm -F dwarf -g -d$(mode) -o $(BUILD)boot.out
+	objcopy -g -I elf32-i386 -O binary $(BUILD)boot.out $(BUILD)to_check_size.bin
 	nasm -f elf $(SRC)trampolines.asm -F dwarf -g -d$(mode) -o $(BUILD)trampolines.o
 
 link: compile_asm

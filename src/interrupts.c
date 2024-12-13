@@ -12,10 +12,11 @@ extern void _cli();
 int glob = 0;
 int glob1 = 0;
 
-void kernel_panic(char *msg, int vector) {
+int kernel_panic(char *msg, int vector) {
     print(msg, vector);
     for (;;)
         ;
+    return 0;
 }
 
 trampoline_no_err *tramp_gen_without_err_code(unsigned char ivector) {
