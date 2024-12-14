@@ -6,6 +6,10 @@ typedef struct {
     byte_t *current;
 } allocator_context_t;
 
+typedef struct _linked_node {
+    struct _linked_node *next;
+} linked_node;
+
 allocator_context_t alloc_cntxt;
 
 void alloc_init() {

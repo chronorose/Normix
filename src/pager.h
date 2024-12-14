@@ -7,6 +7,13 @@
  */
 ;
 
+#define PT_AMOUNT 1024
+#define PAGES_AMOUNT 1024
+#define PAGE 0x1000
+#define ALIGNMENT 0x1000
+#define DISABLED_PAGES 16
+#define KERNEL_PAGE_DIRECTORY 0x80000
+
 void paging_setup();
 
 #pragma pack(push, 1)
@@ -32,3 +39,5 @@ typedef struct {
 } pt_entry;
 
 #pragma pack(pop)
+
+void disable_first_pages(pd_entry *pd);

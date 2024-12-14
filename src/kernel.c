@@ -1,6 +1,6 @@
 #include "alloc.h"
 #include "interrupts.h"
-#include "one_to_one_pager.h"
+#include "pager.h"
 #include "pic.h"
 #include "printer.h"
 
@@ -20,7 +20,7 @@ void another_task() {
 void kmain(void) {
     printer_init();
     alloc_init();
-    /*paging_setup();*/
+    disable_first_pages((pd_entry *) (KERNEL_PAGE_DIRECTORY));
     idt_setup();
     pic_init();
     /*int kek = *((int *) 0x8);*/

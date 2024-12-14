@@ -139,22 +139,6 @@ fill_hhk:
   dec edi
   jnz fill_hhk
 
-  mov ebx, tables
-  mov ecx, 15 ; we turn off first 15 pages. 
-  mov edx, 0
-
-turn_off:
-  mov eax, edx
-  shl eax, 12
-  or eax, 7
-  xor eax, 1
-  mov [ebx], eax
-  add ebx, 4
-  inc edx
-  dec ecx
-  jnz turn_off
-
-
 
 funny_things:
   mov eax, directory

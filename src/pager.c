@@ -1,4 +1,4 @@
-#include "one_to_one_pager.h"
+#include "pager.h"
 
 #include "alloc.h"
 #include "printer.h"
@@ -9,12 +9,19 @@
  * ЧТО-ТО ТУТ НЕ ТАК.
  */
 
-#define PT_AMOUNT 1024
-#define PAGES_AMOUNT 1024
-#define PAGE 0x1000
-#define ALIGNMENT 0x1000
-
 extern void do_paging(pd_entry *pd);
+
+void disable_first_pages(pd_entry *pd) {
+    pt_entry *pt = (pt_entry *) (((unsigned int) pd[0].pt_address) << 12);
+    for (int i = 0; i < DISABLED_PAGES; i++) {
+        pt->present = 0;
+    }
+}
+
+/*void finish_paging() {*/
+/*    pd_entry *pd = (pd_entry *) 0x80000;*/
+/*    for (int i = 769; i < )*/
+/*}*/
 
 pt_entry *createPT(u32 index) {
     pt_entry *pt = (pt_entry *) kernel_malloc_aligned(sizeof(pt_entry) * PAGES_AMOUNT, ALIGNMENT);
