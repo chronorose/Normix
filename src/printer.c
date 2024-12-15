@@ -70,6 +70,9 @@ void print(char *fmt, ...) {
         switch (ch) {
             case '%':
                 switch(*(++fmt)) {
+                    case 'u':
+                        printu(va_arg(ap, u32), 16);
+                        break;
                     case 'd':
                         printi(va_arg(ap, int), 10);
                         break;
@@ -97,6 +100,24 @@ void print(char *fmt, ...) {
     }
     va_end(ap);
     return;
+}
+
+void printu(u32 value, int base) {
+    char bffr[12] = { 0 };
+    int i = 11;
+
+    do {
+        bffr[i--] = itoc[value % base];
+    } while (value /= base);
+
+    if (base == 16) {
+        bffr[i--] = 'x';
+        bffr[i--] = '0';
+    }
+    for (int j = i + 1; j < 12; j++) {
+        vga_print_char(bffr[j], printer.x, printer.y);
+        advance(&printer.x, &printer.y);
+    }
 }
 
 void printi(int value, int base) {

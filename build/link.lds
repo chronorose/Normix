@@ -2,13 +2,15 @@ OUTPUT("elf32-i386")
 OUTPUT_ARCH(i386)
 ENTRY(_start)
 SECTIONS {
-    . = 0xf800;
+    . = 0xc000f800;
+    /*. = 0xf800;*/
     .boot : AT(0xf800)
     {
         build/boot.out(.text)
     }
 
-    . = 0xfa00;
+    /*. = 0xfa00;*/
+    . = 0xc000fa00;
     .kernel : AT(0xfa00)
     {
         *(.text)

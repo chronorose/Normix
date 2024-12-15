@@ -1,6 +1,20 @@
 [BITS 16]
 
+jmp _start
+
+gdt_start:
+    dq 0x0
+gdt_code:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
+gdt_data:
+    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
+gdt_end:
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd _gdt_start
+
 global _start
+
 extern kmain
 
 section .text
@@ -68,7 +82,7 @@ init_video:
 ;; sacred code of omnissiah has ended. you may touch further
 xor ax, ax
 mov ds, ax
-lgdt [gdt_descriptor]
+lgdt [_gdt_descriptor]
 
 mov eax, cr0
 or eax, 1 
@@ -79,9 +93,10 @@ mov eax, cr4
 or ax, 3 << 9
 mov cr4, eax
 
-jmp CODE_SEG:trampolin ;+ 0xf800
+jmp CODE_SEG:_trampoline
+
 [BITS 32]
-trampolin:
+trampoline:
     mov eax, DATA_SEG 
     mov ds, ax
     mov es, ax
@@ -89,24 +104,76 @@ trampolin:
     mov gs, ax
     mov ss, ax
     mov esp, 0xf800
-    call kmain
+
+prep_pd:
+    mov esi, pdir1
+    mov edi, ptable1
+    mov ecx, 1024
+.begin:
+    mov eax, edi
+    and eax, ~0xfff
+    mov [esi], edi
+    add esi, 0x4
+    add edi, 0x1000
+    loop .begin
+.end:
+    or byte [pdir1], flags
+    or byte [pdir1 + 4], flags
+id: ; identity map for 4.8 MiB of kernel
+    mov ecx, 1024 + 128
+    mov esi, ptable1
+    xor edi, edi
+.begin:
+    mov eax, edi
+    and eax, ~0xfff
+    or eax, 0x7
+    mov [esi], eax
+    add esi, 0x4
+    add edi, 0x1000
+    loop .begin
+hhk:
+    or byte [pdir768], flags
+    or byte [pdir768 + 4], flags
+
+    mov ecx, 1024 + 128
+    mov esi, ptable768
+    xor edi, edi
+.begin
+    mov eax, edi
+    and eax, ~0xfff
+    or eax, 0x7
+    mov [esi], eax
+    add esi, 4
+    add edi, 0x1000
+    loop .begin
+
+enable_paging:
+    mov eax, pdir1
+    mov cr3, eax
+    mov eax, cr0
+    or eax, (1 << 31)
+    mov cr0, eax
+
+call kmain
 
 jmp $
 
+pdir1 equ 0x80000
+pdir768 equ (pdir1 + 768 * 4)
 
-gdt_start:
-    dq 0x0
-gdt_code:
-    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x9A, 0xCF, 0x0
-gdt_data:
-    db 0xFF, 0xFF, 0x0, 0x0, 0x0, 0x92, 0xCF, 0x0
-gdt_end:
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start ;+ 0xf800
+ptable1 equ 0x81000
+ptable768 equ (ptable1 + 768 * 1024 * 4)
+
+flags equ 0b111000000111
+pse_flags equ flags | 0b10000111
+
 
 CODE_SEG equ gdt_code - gdt_start
 DATA_SEG equ gdt_data - gdt_start
+
+_gdt_descriptor equ 0xf81a
+_gdt_start equ  0xf802
+_trampoline equ 0xf89c
 
 ; generate zero bytes to size 510
 times  510 - ($ - $$) db 0

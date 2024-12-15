@@ -4,7 +4,7 @@
 
 #define NROWS 25
 #define NCOLS 80
-#define BUFFER (0xb8000)
+#define BUFFER (0xc00b8000)
 #define XY_TO_ADDR(x, y) ((u16 *) BUFFER + ((y) * 80 + (x)))
 #define DEF_FRGRND (WHITE)
 #define DEF_BCKGRND (BLACK)
@@ -34,5 +34,6 @@ void print(char *fmt, ...);
 void advance(int *x, int *y);
 
 void printi(int d, int base);
+void printu(u32 d, int base);
 void newline();
 void scroll();
