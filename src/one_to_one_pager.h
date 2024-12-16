@@ -26,6 +26,20 @@ typedef struct {
     u32 present : 1;
     u32 rw : 1;
     u32 user_supervisor : 1;
+    u32 cache_control1 : 4;
+    u32 page_size : 1;
+    u32 cache_control2 : 1;
+    u32 available : 3;
+    u32 cache_control3 : 1;
+    u32 frame_adress2 : 8;
+    u32 reserved_bit : 1;
+    u32 frame_adress1 : 10;
+} pd_big_entry;
+
+typedef struct {
+    u32 present : 1;
+    u32 rw : 1;
+    u32 user_supervisor : 1;
     u32 cc : 6;
     u32 available : 3;
     u32 frame_address : 20;

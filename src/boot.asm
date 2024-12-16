@@ -91,57 +91,7 @@ trampolin:
     mov gs, ax
     mov ss, ax
     mov esp, 0xf800
-; somewhere here we should start initializing our mr. paging.
 
-;mov ecx, 0 ; pages index.
-;mov ebx, tables ; tables address.
-;mov esi, 1024
-;mov edx, 0
-;fill_pd:
-;  mov eax, ebx 
-;  or eax, 6
-;  mov [directory + edx * 4], eax
-;  inc edx
-;  mov edi, 1024 
-;fill_pt:
-;  mov eax, ecx 
-;  shl eax, 12
-;  or eax, 6
-;  mov [ebx], eax
-;  inc ecx
-;  add ebx, 4
-;  dec edi
-;  jnz fill_pt
-;  dec esi
-;  jnz fill_pd
-;
-;  mov ebx, tables
-;  mov ecx, 16 
-;  mov edx, 0
-;turn_off:
-;  mov eax, edx
-;  shl eax, 12
-;  or eax, 7
-;  xor eax, 1
-;  mov [ebx], eax
-;  add ebx, 4
-;  inc edx
-;  dec ecx
-;  jnz turn_off
-;
-;
-;
-;funny_things:
-;  mov eax, directory
-;  mov cr3, eax
-  ;mov eax, cr0
-  ;or eax, (1 << 31)
-  ;mov cr0, eax
-;
-;
-;afterwards:
-;    ; this adress will become incorrect.
-;    mov esp, 0xf800
 
     call kmain
 jmp $

@@ -2,11 +2,23 @@ global collect_ctx
 global get_eflags
 global experiment
 global do_paging
+global do_paging_big
 extern interrupt_handler
 
 do_paging:
   mov eax, [esp + 4]  ; address of page directory
   mov cr3, eax   
+  mov eax, cr0
+  or eax, (1 << 31)
+  mov cr0, eax
+  ret
+  
+do_paging_big:
+  mov eax, [esp + 4]  ; address of page directory
+  mov cr3, eax 
+  mov eax, cr4
+  or eax, (1 << 4)
+  mov cr4, eax  
   mov eax, cr0
   or eax, (1 << 31)
   mov cr0, eax
