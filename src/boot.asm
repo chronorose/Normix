@@ -132,20 +132,10 @@ id: ; identity map for 4.8 MiB of kernel
     add edi, 0x1000
     loop .begin
 hhk:
-    or byte [pdir768], flags
-    or byte [pdir768 + 4], flags
-
-    mov ecx, 1024 + 128
-    mov esi, ptable768
-    xor edi, edi
-.begin
-    mov eax, edi
-    and eax, ~0xfff
-    or eax, 0x7
-    mov [esi], eax
-    add esi, 4
-    add edi, 0x1000
-    loop .begin
+    mov eax, [pdir1]
+    mov [pdir768], eax
+    mov eax, [pdir1 + 4]
+    mov [pdir768 + 4], eax
 
 enable_paging:
     mov eax, pdir1
@@ -164,7 +154,7 @@ pdir768 equ (pdir1 + 768 * 4)
 ptable1 equ 0x81000
 ptable768 equ (ptable1 + 768 * 1024 * 4)
 
-flags equ 0b111000000111
+flags equ 0b0000111000000111
 pse_flags equ flags | 0b10000111
 
 

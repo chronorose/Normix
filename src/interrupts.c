@@ -64,22 +64,28 @@ static void panic_handler(int vector) {
 }
 
 void timer_handler(ctx_t *ctx) {
-    print("0x20: %d\n", glob++);
-    for (int i = 0; i < 10000; i++) {
-    }
+    print("TIMER\n");
+    // print("0x20: %d\n", glob++);
+    // for (int i = 0; i < 10000; i++) {
+    // }
     _sti();
     pic_send_eoi(ctx->vector);
 }
 
+void page_fault_handler(ctx_t *ctx) {
+    print("PAGE FAULT!\n");
+}
+
 void interrupt_handler(ctx_t *ctx) {
     switch (ctx->vector) {
+        case 0xE:
+            page_fault_handler(ctx);
+            for (;;) ;
+            break;
         case 0x20:
             timer_handler(ctx);
             break;
         case 0x2a:
-            print("0x2a: %d\n", glob1++);
-            for (int i = 0; i < 1000000; i++) {
-            }
             _sti();
             break;
         default:
