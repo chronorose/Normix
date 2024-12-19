@@ -1,5 +1,5 @@
 #include "printer.h"
-printer_t printer;
+printer_t global_printer;
 
 const char itoc[] = {
     [0] = '0',
@@ -20,51 +20,73 @@ const char itoc[] = {
     [15] = 'f',
 };
 
-void printer_init(void) {
-    printer.x = 0;
-    printer.y = 0;
-    printer.frgrnd = DEF_FRGRND;
-    printer.bckgrnd = DEF_BCKGRND;
-    vga_clear_screen();
+printer_t printer_init(unsigned char xstart, unsigned char ystart, unsigned char xend, unsigned char yend) {
+    printer_t new_printer;
+    new_printer.xstart = xstart;
+    new_printer.xend = xend;
+    new_printer.ystart = ystart;
+    new_printer.yend = yend;
+    new_printer.x = xstart;
+    new_printer.y = ystart;
+    new_printer.frgrnd = DEF_FRGRND;
+    new_printer.bckgrnd = DEF_BCKGRND;
+    vga_clear_screen(&new_printer);
+    return new_printer;
 }
 
-void scroll(void) {
-    memmove((void *) BUFFER, (void *) ((u16 *) BUFFER + NCOLS), NCOLS * (NROWS - 1) * 2);
-    memset(XY_TO_ADDR(0, NROWS - 1), 0, NCOLS * 2);
+void global_printer_init() {
+    global_printer.xstart = 0;
+    global_printer.xend = NCOLS;
+    global_printer.ystart = 0;
+    global_printer.yend = NROWS;
+    global_printer.frgrnd = DEF_FRGRND;
+    global_printer.bckgrnd = DEF_BCKGRND;
+    vga_clear_screen(&global_printer);
 }
 
-void advance(int *x, int *y) {
-    (*x)++;
-    if (*x >= NCOLS) {
-        *x = 0;
-        (*y)++;
+void scroll(printer_t *printer) {
+    memmove((void *) XY_TO_ADDR(printer->xstart, printer->ystart),
+            (void *) XY_TO_ADDR(printer->xstart, printer->ystart + 1),
+            (printer->yend - printer->ystart) * (printer->xend - printer->xstart - 1) * 2);
+    memset(XY_TO_ADDR(printer->xstart, printer->yend - 1), 0, (printer->yend - printer->ystart) * 2);
+}
+
+/*#define XY_TO_ADDR(x, y) ((u16 *) BUFFER + ((y) * 80 + (x)))*/
+
+void advance(printer_t *printer) {
+    (printer->x)++;
+    if (printer->x >= printer->xend) {
+        printer->x = printer->xstart;
+        printer->y++;
     }
-    if (*y >= NROWS) {
-        scroll();
-        *y = NROWS - 1;
+    if (printer->y >= printer->yend) {
+        scroll(printer); // remake scroll.
+        printer->y = printer->yend - 1;
     }
 }
 
-void vga_print_char(char s, int x, int y) {
-    *(XY_TO_ADDR(x, y)) = SYMBOL(
+void vga_print_char(printer_t *printer, char s) {
+    *(XY_TO_ADDR(printer->x + printer->xstart, printer->y + printer->ystart)) = SYMBOL(
         s,
-        printer.bckgrnd,
-        printer.frgrnd);
+        printer->bckgrnd,
+        printer->frgrnd);
+    advance(printer);
 }
 
-void vga_clear_screen(void) {
-    memset((void *) BUFFER, 0, NCOLS * NROWS * 2);
+void vga_clear_screen(printer_t *printer) {
+    memset(XY_TO_ADDR(printer->xstart, printer->ystart), 0,
+           (printer->xend - printer->xstart) * (printer->yend - printer->ystart) * 2);
 }
 
-void vga_print_string(char *str, int *x, int *y) {
+void vga_print_string(printer_t *printer, char *str) {
     while (*str) {
-        vga_print_char(*str, *x, *y);
-        advance(x, y);
+        vga_print_char(printer, *str);
+        /*advance(x, y);*/
         str++;
     }
 }
 
-void print(char *fmt, ...) {
+void print(printer_t *printer, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     while (*fmt) {
@@ -73,26 +95,26 @@ void print(char *fmt, ...) {
             case '%':
                 switch (*(++fmt)) {
                     case 'd':
-                        printi(va_arg(ap, int), 10);
+                        printi(printer, va_arg(ap, int), 10);
                         break;
                     case 'x':
-                        printi(va_arg(ap, int), 16);
+                        printi(printer, va_arg(ap, int), 16);
                         break;
                     case 's':
-                        vga_print_string(va_arg(ap, char *), &printer.x, &printer.y);
+                        vga_print_string(printer, va_arg(ap, char *));
                         break;
                     case 'c':
-                        vga_print_char(va_arg(ap, char), printer.x, printer.y);
-                        advance(&printer.x, &printer.y);
+                        vga_print_char(printer, va_arg(ap, char));
+                        advance(printer);
                         break;
                 }
                 break;
             case '\n':
-                newline();
+                newline(printer);
                 break;
             default:
-                vga_print_char(ch, printer.x, printer.y);
-                advance(&printer.x, &printer.y);
+                vga_print_char(printer, ch);
+                advance(printer);
                 break;
         }
         fmt++;
@@ -101,7 +123,7 @@ void print(char *fmt, ...) {
     return;
 }
 
-void printi(int value, int base) {
+void printi(printer_t *printer, int value, int base) {
     char bffr[12] = {0};
     int i = 11;
     int neg = 0;
@@ -122,16 +144,16 @@ void printi(int value, int base) {
         bffr[i--] = '-';
     }
     for (int j = i + 1; j < 12; j++) {
-        vga_print_char(bffr[j], printer.x, printer.y);
-        advance(&printer.x, &printer.y);
+        vga_print_char(printer, bffr[j]);
+        advance(printer);
     }
 }
 
-void newline() {
-    printer.x = 0;
-    printer.y++;
-    if (printer.y >= NROWS) {
-        scroll();
-        printer.y = NROWS - 1;
+void newline(printer_t *printer) {
+    printer->x = printer->xstart;
+    printer->y++;
+    if (printer->y >= printer->yend) {
+        scroll(printer);
+        printer->y = printer->yend - 1;
     }
 }

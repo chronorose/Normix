@@ -1,5 +1,4 @@
 #pragma once
-#include "interrupts.h"
 #include "types.h"
 
 #define MAX(x, y) ((x) < (y) ? (y) : (x))

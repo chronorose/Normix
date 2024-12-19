@@ -21,18 +21,20 @@ typedef enum {
 typedef struct {
     int x, y;
     char frgrnd, bckgrnd;
+    int xstart, ystart, xend, yend;
 } printer_t;
 
-void printer_init(void);
+printer_t printer_init(unsigned char xstart, unsigned char ystart, unsigned char xend, unsigned char yend);
+void global_printer_init();
 
-void vga_print_char(char s, int x, int y);
-void vga_print_string(char *str, int *x, int *y);
-void vga_clear_screen(void);
+void vga_print_char(printer_t *printer, char s);
+void vga_print_string(printer_t *printer, char *str);
+void vga_clear_screen(printer_t *printer);
 
-void print(char *fmt, ...);
+void print(printer_t *printer, char *fmt, ...);
 
-void advance(int *x, int *y);
+void advance(printer_t *printer);
 
-void printi(int d, int base);
-void newline();
-void scroll();
+void printi(printer_t *printer, int d, int base);
+void newline(printer_t *printer);
+void scroll(printer_t *printer);

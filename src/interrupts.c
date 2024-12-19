@@ -2,7 +2,6 @@
 
 #include "alloc.h"
 #include "pic.h"
-#include "printer.h"
 
 extern void collect_ctx();
 extern u32 get_eflags();
@@ -13,7 +12,7 @@ int glob = 0;
 int glob1 = 0;
 
 int kernel_panic(char *msg, int vector) {
-    print(msg, vector);
+    print(&global_printer, msg, vector);
     for (;;)
         ;
     return 0;
@@ -65,10 +64,11 @@ static void panic_handler(int vector) {
 }
 
 void timer_handler(ctx_t *ctx) {
-    print("0x20: %d\n", glob++);
-    for (int i = 0; i < 10000; i++) {
+    if (LOG_TIMER) {
+        print(&global_printer, "0x20: %d\n", glob++);
+        for (int i = 0; i < 10000; i++) {
+        }
     }
-    _sti();
     pic_send_eoi(ctx->vector);
 }
 
@@ -78,14 +78,18 @@ void interrupt_handler(ctx_t *ctx) {
             timer_handler(ctx);
             break;
         case 0x2a:
-            print("0x2a: %d\n", glob1++);
+            print(&global_printer, "0x2a: %d\n", glob1++);
             for (int i = 0; i < 1000000; i++) {
             }
-            _sti();
+            /*_sti();*/
+            break;
+        case 0x33:
+            print(&global_printer, "%d", ctx->eax);
             break;
         default:
             panic_handler(ctx->vector);
     }
+    _sti();
 }
 
 extern void lidt_load(void *ptr);
@@ -96,7 +100,7 @@ void idt_setup() {
         (gate_descriptor_t *) kernel_malloc(idt_sz * sizeof(gate_descriptor_t));
 
     if (!idt) {
-        print("Not enough memory to allocate idt\n");
+        print(&global_printer, "Not enough memory to allocate idt\n");
         return;
     }
 
@@ -121,5 +125,5 @@ void idt_setup() {
 
 void ctx_print(ctx_t *ctx) {
     char *msg = "Kernel panic: unhandled interrupt %x, interrupted process context:\neax = %x, ecx = %x, edx = %x, ebx = %x, esp = %x, ebp = %x, esi = %x, edi = %x, ds = %x, es = %x, fs = %x, gs = %x, cs = %x, eip = %x\neflags (interrupted) = %x eflags (current) = %x, error code = %x";
-    print(msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
+    print(&global_printer, msg, ctx->vector, ctx->eax, ctx->ecx, ctx->edx, ctx->ebx, ctx->esp, ctx->ebp, ctx->esi, ctx->edi, ctx->ds, ctx->es, ctx->fs, ctx->gs, ctx->cs, ctx->eip, ctx->eflags, get_eflags(), ctx->err_code);
 }

@@ -17,11 +17,6 @@ SECTIONS {
         *(.data)
         *(.bss)
         *(COMMON)
-        /*build/kernel.o(.text)
-        build/kernel.o(.rodata)
-        build/kernel.o(.data)
-        build/kernel.o(.bss)
-        build/kernel.o(COMMON) */
     }
     /DISCARD/ : {
         *(.eh_frame)

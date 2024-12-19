@@ -29,5 +29,5 @@ void kbd_handler(void) {
         kbd.pressed = c;
         kbd.buffer[kbd.wptr++] = kbd.pressed;
     }
-    print("%x", kbd.buffer[kbd.rptr++]);
+    /*print("%x", kbd.buffer[kbd.rptr++]);*/
 }

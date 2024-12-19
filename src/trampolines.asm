@@ -43,6 +43,12 @@ experiment:
     int 42
     ret
 
+global syscall_test
+syscall_test:
+  mov eax, 69
+  int 0x33
+  ret
+
 get_eflags:
     pushfd 
     pop eax

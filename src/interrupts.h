@@ -1,9 +1,11 @@
 #pragma once
+#include "printer.h"
 #include "types.h"
 
 #define PUSH_BYTE_INSTRUCTION 0x6A
 #define JUMP_RELATIVE_4BYTES_INSTRUCTION 0xE9
 #define IDT_SIZE 256
+#define LOG_TIMER 0
 
 typedef enum {
     INTERRUPT_GATE = 0xE,
@@ -71,6 +73,7 @@ typedef struct {
 
 #pragma pack(pop)
 
+extern printer_t global_printer;
 
 int kernel_panic(char *msg, int vector);
 void idt_setup();
