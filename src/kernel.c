@@ -17,10 +17,16 @@ void another_task() {
 }
 
 void turn_off_pages() {
+    u32 *pd = (u32 *) 0xc0080000;
     u32 *pt = (u32 *) 0xc0081000;
     for (u32 pti = 0; pti < 15; pti++) {
-        pt[pti] &= ~0x1;
+        pt[pti] = 0;
     }
+    u32 *x = (u32 *)0x0;
+    u32 xx = *x;
+    // print("%x\n", pd[0]);
+    // pd[0] = 0;
+    // pd[1] = 0;
 }
 
 void kmain(void) {
