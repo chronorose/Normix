@@ -73,5 +73,6 @@ typedef struct {
 
 
 void kernel_panic(char *msg, int vector);
+void idt_descriptor_init(idt_descriptor_t *d, u16 size, u32 addr);
 void idt_setup();
 void ctx_print(ctx_t *ctx);

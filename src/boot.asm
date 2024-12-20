@@ -105,37 +105,42 @@ trampoline:
     mov ss, ax
     mov esp, 0xf800
 
-prep_pd:
-    mov esi, pdir1
-    mov edi, ptable1
-    mov ecx, 1024
-.begin:
+mov ecx, 1024
+mov esi, pdir1
+mov edx, ptable1
+mov edi, 0
+
+fill_pd:
+    mov eax, edx
+    and eax, ~0xfff
+    or eax, 7
+    mov [esi], eax 
+    add esi, 4
+    mov ebx, 1024
+fill_pt:
     mov eax, edi
     and eax, ~0xfff
-    mov [esi], edi
-    add esi, 0x4
+    or eax, 7
+    mov [edx], eax
+    add edx, 4
     add edi, 0x1000
-    loop .begin
-.end:
-    or byte [pdir1], flags
-    or byte [pdir1 + 4], flags
-id: ; identity map for 4.8 MiB of kernel
-    mov ecx, 1024 + 128
-    mov esi, ptable1
-    xor edi, edi
-.begin:
+    dec ebx
+    jnz fill_pt
+    dec ecx
+    jnz fill_pd
+
+mov esi, ptable768
+xor edi, edi
+mov ecx, 2048
+
+fill_hhk:
     mov eax, edi
     and eax, ~0xfff
-    or eax, 0x7
+    or eax, 7
     mov [esi], eax
-    add esi, 0x4
+    add esi, 4
     add edi, 0x1000
-    loop .begin
-hhk:
-    mov eax, [pdir1]
-    mov [pdir768], eax
-    mov eax, [pdir1 + 4]
-    mov [pdir768 + 4], eax
+    loop fill_hhk
 
 enable_paging:
     mov eax, pdir1
@@ -148,10 +153,10 @@ call kmain
 
 jmp $
 
-pdir1 equ 0x80000
+pdir1 equ 0x100000
 pdir768 equ (pdir1 + 768 * 4)
 
-ptable1 equ 0x81000
+ptable1 equ 0x101000
 ptable768 equ (ptable1 + 768 * 1024 * 4)
 
 flags equ 0b0000111000000111

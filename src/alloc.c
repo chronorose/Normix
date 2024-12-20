@@ -1,5 +1,6 @@
 #include "alloc.h"
 
+#include "printer.h"
 #include "stdlib.h"
 
 typedef struct {
@@ -13,6 +14,7 @@ void alloc_init() {
 }
 
 byte_t *kernel_malloc(u32 size) {
+    print("%u\n", alloc_cntxt.current);
     if (alloc_cntxt.current + size > HEAP_END) {
         return 0;
     }

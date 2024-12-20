@@ -74,13 +74,13 @@ void timer_handler(ctx_t *ctx) {
 
 void page_fault_handler(ctx_t *ctx) {
     print("PAGE FAULT!\n");
+    for (;;);
 }
 
 void interrupt_handler(ctx_t *ctx) {
     switch (ctx->vector) {
         case 0xE:
             page_fault_handler(ctx);
-            for (;;) ;
             break;
         case 0x20:
             timer_handler(ctx);
