@@ -1,9 +1,12 @@
 #pragma once
 #include "types.h"
 
-#define PUSH_BYTE_INSTRUCTION 0x6A
-#define JUMP_RELATIVE_4BYTES_INSTRUCTION 0xE9
 #define IDT_SIZE 256
+
+extern void collect_ctx();
+extern u32 get_eflags();
+extern void _sti();
+extern void _cli();
 
 typedef enum {
     INTERRUPT_GATE = 0xE,
@@ -11,22 +14,6 @@ typedef enum {
 } GATE_TYPE;
 
 #pragma pack(push, 1)
-
-typedef struct {
-    unsigned char push;
-    unsigned char ivector;
-    unsigned char j;
-    int handler_addr;
-} trampoline_no_err;
-
-typedef struct {
-    unsigned char push;
-    unsigned char err_code;
-    unsigned char push2;
-    unsigned char ivector;
-    unsigned char j;
-    int handler_addr;
-} trampoline;
 
 typedef struct {
     u16 offset_low;

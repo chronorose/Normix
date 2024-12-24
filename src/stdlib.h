@@ -12,3 +12,4 @@ typedef byte_t *va_list;
 
 void memset(void *dst, int c, int n);
 void *memmove(void *dst, void *src, int n);
+u32 proc_spawn(void *);

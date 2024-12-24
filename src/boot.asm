@@ -153,6 +153,8 @@ call kmain
 
 jmp $
 
+extern pic_send_eoi
+
 pdir1 equ 0x100000
 pdir768 equ (pdir1 + 768 * 4)
 

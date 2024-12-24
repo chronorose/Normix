@@ -39,7 +39,7 @@ void pic_init(void) {
     }
     pic_mask_all();
     pic_unmask(IRQ_TIMER);
-    // pic_unmask(IRQ_KBD);
+    pic_unmask(IRQ_KBD);
 
     /**
    * Drivers setup

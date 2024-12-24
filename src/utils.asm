@@ -6,7 +6,7 @@ lidt_load:
 
 global inter
 inter:
-    int 0x0 
+    int 0x2a 
     ret
 
 global _sti
@@ -31,3 +31,7 @@ _outb:
     mov dx, word [esp + 4]
     out dx, al
     ret
+
+
+global proc_push_ctx
+proc_push_ctx:

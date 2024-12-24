@@ -2,13 +2,11 @@
 #include "interrupts.h"
 #include "pic.h"
 #include "printer.h"
+#include "scheduler.h"
 
-extern printer_t printer;
 extern void inter();
 extern void _sti();
 extern void _cli();
-extern void experiment();
-extern void collect_ctx();
 
 void another_task() {
     for (int i = 0; i < 100000; i++) {
@@ -16,41 +14,47 @@ void another_task() {
     print("another task\n");
 }
 
-u32 *foo(u32 *virt) {
-    u32 *pdir = (u32 *) 0xc0100000;
-    u32 *ptable = (u32 *) 0xc0101000;
-
-    u32 pdindex = (u32) virt >> 22;
-    u32 ptindex = (u32) virt >> 12 & 0x03FF;
-
-    print("%x %x\n", pdindex, ptindex);
-
-    u32 *pt = ((u32 *) ptable) + (0x400 * pdindex);
-    return (u32 *) (pt[ptindex] & ~0xFFF) + ((u32) virt & 0xFFF);
+void p1_entry() {
+    for (;;) {
+        print("Hello from p1\n");
+    }
 }
 
-void turn_off_pages() {
-    u32 *pd = (u32 *) 0xc0100000;
-    u32 *pt = (u32 *) 0xc0101000;
-    // u32 *pt = (u32 *) 0x00101000;
-    for (u32 pti = 0; pti < 15; pti++) {
-        pt[pti] &= ~0x1;
+void p2_entry() {
+    for (;;) {
+        print("Hello from p2\n");
     }
-    // for (;;)
-    //     ;
-    // u32 xx = *x;
+}
+
+void p3_entry() {
+    for (;;) {
+        print("Hello from p3\n");
+    }
+}
+
+void p4_entry() {
+    for (;;) {
+        print("Hello from p4\n");
+    }
+}
+
+void foo() {
+    u32 p1 = proc_spawn(p1_entry);
+    u32 p2 = proc_spawn(p2_entry);
+    u32 p3 = proc_spawn(p3_entry);
+    u32 p4 = proc_spawn(p4_entry);
 }
 
 void kmain(void) {
     printer_init();
     alloc_init();
-    // foo();
     idt_setup();
-    turn_off_pages();
     pic_init();
+    sched_init();
     _sti();
+    // foo();
+    // inter();
     for (;;) {
         // another_task();
-        // experiment();
     }
 }

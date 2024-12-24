@@ -1,6 +1,5 @@
 #include "alloc.h"
 
-#include "printer.h"
 #include "stdlib.h"
 
 typedef struct {
@@ -14,7 +13,6 @@ void alloc_init() {
 }
 
 byte_t *kernel_malloc(u32 size) {
-    print("%u\n", alloc_cntxt.current);
     if (alloc_cntxt.current + size > HEAP_END) {
         return 0;
     }
@@ -28,7 +26,7 @@ byte_t *kernel_calloc(u32 nmemb, u32 size) {
     if (!addr) {
         return 0;
     }
-    memset(addr, 0, nmemb);
+    memset(addr, 0, nmemb * size);
     return addr;
 }
 
@@ -39,4 +37,9 @@ byte_t *kernel_realloc(void *ptr, u32 size) {
     }
     memmove(new_addr, ptr, size);
     return new_addr;
+}
+
+byte_t *kernel_malloc_aligned(u32 size, u32 align) {
+    alloc_cntxt.current = (byte_t *) (((u32) alloc_cntxt.current - 1 + align) & (-align));
+    return kernel_malloc(size);
 }
