@@ -112,22 +112,19 @@ mov edi, 0
 
 fill_pd:
     mov eax, edx
-    and eax, ~0xfff
     or eax, 7
     mov [esi], eax 
     add esi, 4
     mov ebx, 1024
-fill_pt:
-    mov eax, edi
-    and eax, ~0xfff
-    or eax, 7
-    mov [edx], eax
-    add edx, 4
-    add edi, 0x1000
-    dec ebx
-    jnz fill_pt
-    dec ecx
-    jnz fill_pd
+    fill_pt:
+        mov eax, edi
+        or eax, 7
+        mov [edx], eax
+        add edx, 4
+        add edi, 0x1000
+        dec ebx
+        jnz fill_pt
+    loop fill_pd
 
 mov esi, ptable768
 xor edi, edi
@@ -159,7 +156,7 @@ pdir1 equ 0x100000
 pdir768 equ (pdir1 + 768 * 4)
 
 ptable1 equ 0x101000
-ptable768 equ (ptable1 + 768 * 1024 * 4)
+ptable768 equ (ptable1 + 768 * 4 * 1024)
 
 flags equ 0b0000111000000111
 pse_flags equ flags | 0b10000111

@@ -55,6 +55,7 @@ void kmain(void) {
     // foo();
     // inter();
     for (;;) {
+        _sti();
         // another_task();
     }
 }

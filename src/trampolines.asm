@@ -23,6 +23,7 @@ collect_ctx:
     push es
     push fs
     push gs
+    pusha
     push esp
     mov ax, 0x10
     mov ds, ax
